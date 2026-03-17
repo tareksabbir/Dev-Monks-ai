@@ -12,7 +12,7 @@ import { FooterCTA } from "@/components/FooterCTA";
 import { Footer } from "@/components/Footer";
 import { POSTS } from "@/lib/data";
 
-export default function MistralBlogPage() {
+export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState("All Categories");
   const [searchQuery, setSearchQuery] = useState("");
   const filteredPosts = POSTS.filter((p) => {

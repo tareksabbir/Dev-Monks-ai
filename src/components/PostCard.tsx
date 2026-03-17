@@ -1,24 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { motion } from "framer-motion";
-
-// Inlining ArrowRight to keep files independent for now
-function ArrowRight({ size = 16, color = "currentColor" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <path
-        d="M3 8h10M9 4l4 4-4 4"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+import { ArrowRight } from "lucide-react";
 
 export function PostCard({ post }: { post: any }) {
   return (
-    <motion.div 
+    <motion.div
       layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -33,7 +19,7 @@ export function PostCard({ post }: { post: any }) {
             {post.tag}
           </span>
         </div>
-        <h3 className="text-[1.35rem] leading-snug font-normal text-[#1a1a1a] mb-3 group-hover:text-[#ff6b00] transition-colors">
+        <h3 className="text-[1.35rem] leading-snug font-normal text-[#1a1a1a] mb-3 group-hover:text-[#ff6b00]  group-hover:font-medium transition-colors">
           {post.title}
         </h3>
         {post.excerpt && (
@@ -50,8 +36,8 @@ export function PostCard({ post }: { post: any }) {
         <div className="flex-[1.5] border-r border-[#d8c8a8] flex items-center px-4 text-[11px] font-medium text-[#1a1a1a]/80 truncate">
           {post.author}
         </div>
-        <div className="w-10 flex items-center justify-center text-[#1a1a1a]/40 group-hover:text-[#1a1a1a] transition-colors">
-          <ArrowRight size={14} />
+        <div className="w-10 flex items-center justify-center text-[#1a1a1a]/40 group-hover:text-white  group-hover:bg-[#ff6b00] transition-colors">
+          <ArrowRight size={16} />
         </div>
       </div>
     </motion.div>

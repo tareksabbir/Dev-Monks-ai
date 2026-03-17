@@ -1,6 +1,7 @@
 "use client";
 
 import { FEATURED_POST } from "@/lib/data";
+import { ArrowRight } from "lucide-react";
 
 const PAGE_GRID_STYLE = {
   backgroundImage: `
@@ -10,19 +11,7 @@ const PAGE_GRID_STYLE = {
   backgroundSize: "32px 32px",
 };
 
-function ArrowRight({ size = 16, color = "currentColor" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-      <path
-        d="M3 8h10M9 4l4 4-4 4"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+
 
 export function FeaturedPost() {
   return (
