@@ -2,48 +2,50 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { FeaturedPost } from "@/components/FeaturedPost";
 import { FilterBar } from "@/components/FilterBar";
 import { PostCard } from "@/components/PostCard";
 import { PostCardSkeleton, FeaturedPostSkeleton } from "@/components/PostCardSkeleton";
 import { FooterCTA } from "@/components/FooterCTA";
-import { Footer } from "@/components/Footer";
 import { useStories, useFeaturedStory } from "@/hooks/useStories";
 import { HNItem } from "@/lib/hn-api";
+import { useMemo, useCallback } from "react";
+
+// Mapping categories to HN types - outside component for stable reference
+const getHNType = (category: string): "top" | "new" | "best" | "ask" | "show" | "job" | "all" => {
+  switch (category) {
+    case "All": return "all";
+    case "New": return "new";
+    case "Best": return "best";
+    case "Ask HN": return "ask";
+    case "Show HN": return "show";
+    case "Jobs": return "job";
+    default: return "top";
+  }
+};
 
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Mapping categories to HN types
-  const getHNType = (category: string): "top" | "new" | "best" | "ask" | "show" | "job" | "all" => {
-    switch (category) {
-      case "All": return "all";
-      case "New": return "new";
-      case "Best": return "best";
-      case "Ask HN": return "ask";
-      case "Show HN": return "show";
-      case "Jobs": return "job";
-      default: return "top";
-    }
-  };
-
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isPlaceholderData } = useStories(
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useStories(
     getHNType(activeCategory), 
     searchQuery
   );
 
   const { data: featuredPost, isLoading: isFeaturedLoading } = useFeaturedStory();
 
-  const allPosts = (data?.pages.flat() || []) as HNItem[];
+  const allPosts = useMemo(() => (data?.pages.flat() || []) as HNItem[], [data?.pages]);
   const featured = featuredPost as HNItem | undefined;
 
+  const handleCategoryChange = useCallback((cat: string) => {
+    setActiveCategory(cat);
+    setSearchQuery(""); // Clear search when switching categories
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#fffdf4] font-sans flex flex-col">
-      <Navbar />
-      <main className="flex-1 flex flex-col w-full">
+    <main className="flex-1 flex flex-col w-full">
         <Hero />
         <div className="w-full flex-col flex items-center pb-8">
           {isFeaturedLoading && !featured ? (
@@ -55,13 +57,13 @@ export default function BlogPage() {
           <div className="w-full max-w-7xl">
             <FilterBar
               activeCategory={activeCategory}
-              setActiveCategory={setActiveCategory}
+              setActiveCategory={handleCategoryChange}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
             />
             
             <div className="min-h-[600px]">
-              {(isLoading || isPlaceholderData) && allPosts.length === 0 ? (
+              {isLoading && allPosts.length === 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 lg:px-0">
                   {Array.from({ length: 12 }).map((_, i) => (
                     <PostCardSkeleton key={i} />
@@ -83,6 +85,14 @@ export default function BlogPage() {
                             <PostCard key={post.id} post={post} />
                           ))}
                       </motion.div>
+                      
+                      {isFetchingNextPage && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 lg:px-0 mt-6">
+                          {Array.from({ length: 3 }).map((_, i) => (
+                            <PostCardSkeleton key={`more-${i}`} />
+                          ))}
+                        </div>
+                      )}
                       
                       {hasNextPage && (
                         <div className="flex justify-center mt-16 pb-12">
@@ -127,7 +137,5 @@ export default function BlogPage() {
           <FooterCTA />
         </div>
       </main>
-      <Footer />
-    </div>
   );
 }
