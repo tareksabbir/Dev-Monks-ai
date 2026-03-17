@@ -24,13 +24,14 @@ export function Navbar() {
           {/* Desktop nav links — hidden below lg */}
           <div className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => (
-              <button
+              <Link
                 key={link.label}
+                href={link.href || "#"}
                 className="flex items-center text-sm font-medium text-[#1a1a1a] hover:text-[#ff6b00] px-2 py-1.5 rounded transition-colors"
               >
                 {link.label}
                 {link.hasDropdown && <NavDropdownIcon />}
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -68,13 +69,15 @@ export function Navbar() {
         <div className="lg:hidden border-t border-[#e8e0d0] bg-[#fffdf4] animate-in slide-in-from-top-1 duration-150">
           <div className="flex flex-col py-2">
             {NAV_LINKS.map((link) => (
-              <button
+              <Link
                 key={link.label}
+                href={link.href || "#"}
                 className="flex items-center justify-between w-full text-[15px] font-medium text-[#1a1a1a] hover:text-[#ff6b00] hover:bg-[#ff6b00]/5 px-5 py-3 transition-colors"
+                onClick={() => setMenuOpen(false)}
               >
                 {link.label}
                 {link.hasDropdown && <NavDropdownIcon />}
-              </button>
+              </Link>
             ))}
 
             <div className="h-px bg-[#e8e0d0] mx-5 my-2" />
