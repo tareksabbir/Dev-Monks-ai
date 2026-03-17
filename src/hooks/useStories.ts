@@ -1,5 +1,5 @@
 'use client';
-import { useInfiniteQuery, useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 export function useStories(type: 'top' | 'new' | 'best' | 'ask' | 'show' | 'job' | 'all', query = "") {
   return useInfiniteQuery({
@@ -14,7 +14,8 @@ export function useStories(type: 'top' | 'new' | 'best' | 'ask' | 'show' | 'job'
       if (!lastPage || lastPage.length < 12) return undefined;
       return allPages.length;
     },
-    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 2, // 2 minutes stale time
+    gcTime: 1000 * 60 * 10,   // 10 minutes garbage collection
   });
 }
 
