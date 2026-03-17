@@ -1,10 +1,11 @@
 export const NAV_LINKS = [
-  { label: "Products", hasDropdown: true },
-  { label: "Solutions", hasDropdown: true },
-  { label: "Research", hasDropdown: true },
-  { label: "Blog", hasDropdown: true },
-  { label: "Customers", hasDropdown: true },
-  { label: "Company", hasDropdown: true },
+  { label: "My Bookmarks",hasDropdown: true, href: "/bookmarks" },
+  { label: "Products", hasDropdown: true, href: "#" },
+  { label: "Solutions", hasDropdown: true, href: "#" },
+  { label: "Research", hasDropdown: true, href: "#" },
+  { label: "Blog", hasDropdown: true, href: "#" },
+  { label: "Customers", hasDropdown: true, href: "#" },
+  { label: "Company", hasDropdown: true, href: "#" },
 ];
 
 export const CATEGORIES = [
