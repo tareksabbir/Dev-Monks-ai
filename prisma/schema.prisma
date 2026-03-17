@@ -12,3 +12,23 @@ datasource db {
   provider = "postgresql"
 }
 
+model Bookmark {
+  id          String   @id @default(cuid())
+  storyId     Int      @unique
+  title       String
+  url         String?
+  author      String
+  score       Int
+  time        Int
+  descendants Int      @default(0)
+  savedAt     DateTime @default(now())
+}
+
+model Summary {
+  id        String   @id @default(cuid())
+  storyId   Int      @unique
+  keyPoints String   // JSON array
+  sentiment String
+  summary   String
+  createdAt DateTime @default(now())
+}
