@@ -25,16 +25,6 @@ export function useStories(
   });
 }
 
-export function useStory(id: number) {
-  return useQuery({
-    queryKey: ["story", id],
-    queryFn: async () => {
-      const res = await fetch(`/api/stories/${id}`);
-      return res.json();
-    },
-  });
-}
-
 export function useFeaturedStory() {
   return useQuery({
     queryKey: ["featured-story"],

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 
-const USER_ID_COOKIE = "dev_monks_user_id";
+export const USER_ID_COOKIE = "dev_monks_user_id";
 
 /**
  * Gets the current anonymous user ID from cookies,
@@ -10,13 +10,27 @@ const USER_ID_COOKIE = "dev_monks_user_id";
  */
 export async function getOrCreateUserId() {
   const cookieStore = await cookies();
+  const userId = cookieStore.get(USER_ID_COOKIE)?.value;
+
+  if (!userId) {
+    return uuidv4();
+  }
+
+  return userId;
+}
+
+/**
+ * Ensures a user ID exists in the cookies, creating one if it doesn't.
+ * This function should ONLY be used in Server Actions or Route Handlers,
+ * as it attempts to set a cookie.
+ */
+export async function ensureUserId() {
+  const cookieStore = await cookies();
   let userId = cookieStore.get(USER_ID_COOKIE)?.value;
 
   if (!userId) {
     userId = uuidv4();
-    // Note: In Server Actions or Route Handlers, use cookieStore.set()
-    // Otherwise, this function should be used to retrieve the ID,
-    // and the client-side/middleware should ensure it's set.
+    await setUserIdCookie(userId);
   }
 
   return userId;

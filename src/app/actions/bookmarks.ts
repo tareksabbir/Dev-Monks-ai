@@ -4,26 +4,8 @@
 import { prisma } from "@/lib/prisma";
 import { HNItem } from "@/lib/hn-api";
 import { revalidatePath } from "next/cache";
-import { v4 as uuidv4 } from "uuid";
 import { cookies } from "next/headers";
-
-const USER_ID_COOKIE = "dev_monks_user_id";
-
-async function ensureUserId() {
-  const cookieStore = await cookies();
-  let userId = cookieStore.get(USER_ID_COOKIE)?.value;
-  if (!userId) {
-    userId = uuidv4();
-    cookieStore.set(USER_ID_COOKIE, userId, {
-      maxAge: 60 * 60 * 24 * 365, // 1 year
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
-  }
-  return userId;
-}
+import { ensureUserId, USER_ID_COOKIE } from "@/cookies/auth-utils";
 
 export async function toggleBookmark(item: HNItem) {
   const userId = await ensureUserId();
