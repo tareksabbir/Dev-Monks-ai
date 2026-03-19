@@ -15,7 +15,7 @@ export async function getOrCreateUserId() {
   if (!userId) {
     userId = uuidv4();
     // Note: In Server Actions or Route Handlers, use cookieStore.set()
-    // Otherwise, this function should be used to retrieve the ID, 
+    // Otherwise, this function should be used to retrieve the ID,
     // and the client-side/middleware should ensure it's set.
   }
 

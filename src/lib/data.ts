@@ -1,5 +1,5 @@
 export const NAV_LINKS = [
-  { label: "My Bookmarks",hasDropdown: true, href: "/bookmarks" },
+  { label: "My Bookmarks", hasDropdown: true, href: "/bookmarks" },
   { label: "Products", hasDropdown: true, href: "#" },
   { label: "Solutions", hasDropdown: true, href: "#" },
   { label: "Research", hasDropdown: true, href: "#" },
@@ -17,7 +17,6 @@ export const CATEGORIES = [
   "Show HN",
   "Jobs",
 ];
-
 
 export const TAG_COLORS: Record<string, string> = {
   Research: "bg-[#fdfaf5] text-[#1a1a1a] border-[#1a1a1a]",

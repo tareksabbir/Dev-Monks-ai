@@ -2,19 +2,23 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { BookmarkProvider } from "../context/BookmarkContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000,
-      },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000,
+          },
+        },
+      }),
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <BookmarkProvider>{children}</BookmarkProvider>
     </QueryClientProvider>
   );
 }

@@ -16,7 +16,7 @@ export function Navbar() {
         <div className="flex items-center gap-6 lg:gap-8">
           <Link
             href="/"
-            className="w-8 h-8 bg-[#ff6b00] flex items-center justify-center flex-shrink-0"
+            className="w-8 h-8 bg-[#ff6b00] flex items-center justify-center shrink-0"
           >
             <span className="text-white font-black text-sm">Y</span>
           </Link>

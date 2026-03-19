@@ -15,9 +15,6 @@ export function Footer() {
           <div key={i} className={`h-8 w-full ${color}`} />
         ))}
       </div>
-      
-      {/* There's a dark footer under the gradients in the first code, but the screenshot only shows the gradients at the bottom.
-          If there's more below the screenshot, we can omit it since the task asks to match the SS. */}
     </footer>
   );
 }

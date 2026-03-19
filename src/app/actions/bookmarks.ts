@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getOrCreateUserId, setUserIdCookie } from "@/lib/auth-utils";
 import { HNItem } from "@/lib/hn-api";
 import { revalidatePath } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
@@ -28,7 +28,7 @@ async function ensureUserId() {
 export async function toggleBookmark(item: HNItem) {
   const userId = await ensureUserId();
   const storyId = Number(item.id);
-  
+
   const existing = await prisma.bookmark.findUnique({
     where: {
       storyId_userId: {

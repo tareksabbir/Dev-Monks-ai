@@ -1,7 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { getBookmarkIds, toggleBookmark as toggleAction } from "@/app/actions/bookmarks";
+import {
+  getBookmarkIds,
+  toggleBookmark as toggleAction,
+} from "@/app/actions/bookmarks";
 import { HNItem } from "@/lib/hn-api";
 
 interface BookmarkContextType {
@@ -11,7 +15,9 @@ interface BookmarkContextType {
   refreshBookmarks: () => Promise<void>;
 }
 
-const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined);
+const BookmarkContext = createContext<BookmarkContextType | undefined>(
+  undefined,
+);
 
 export function BookmarkProvider({ children }: { children: React.ReactNode }) {
   const [bookmarkIds, setBookmarkIds] = useState<Set<number>>(new Set());
@@ -34,7 +40,7 @@ export function BookmarkProvider({ children }: { children: React.ReactNode }) {
   const toggleBookmark = async (item: HNItem) => {
     const id = Number(item.id);
     const isCurrentlyBookmarked = bookmarkIds.has(id);
-    
+
     // Optimistic update
     const newIds = new Set(bookmarkIds);
     if (isCurrentlyBookmarked) {
@@ -55,7 +61,9 @@ export function BookmarkProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <BookmarkContext.Provider value={{ bookmarkIds, isBookmarked, toggleBookmark, refreshBookmarks }}>
+    <BookmarkContext.Provider
+      value={{ bookmarkIds, isBookmarked, toggleBookmark, refreshBookmarks }}
+    >
       {children}
     </BookmarkContext.Provider>
   );

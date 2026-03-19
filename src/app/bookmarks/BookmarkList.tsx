@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { HNItem } from "@/lib/hn-api";
 import { PostCard } from "@/components/PostCard";
-import { Search, Filter, X, Bookmark } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface BookmarkListProps {
@@ -25,14 +25,16 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
     return posts.filter((post) => {
       const searchLower = searchQuery.toLowerCase();
       const words = searchLower.split(/\s+/).filter(Boolean);
-      
-      const matchesSearch = words.every(word => 
-        post.title?.toLowerCase().includes(word) ||
-        post.by.toLowerCase().includes(word)
+
+      const matchesSearch = words.every(
+        (word) =>
+          post.title?.toLowerCase().includes(word) ||
+          post.by.toLowerCase().includes(word),
       );
-      
-      const matchesFilter = activeFilter === "all" || post.type === activeFilter;
-      
+
+      const matchesFilter =
+        activeFilter === "all" || post.type === activeFilter;
+
       return matchesSearch && matchesFilter;
     });
   }, [posts, searchQuery, activeFilter]);
@@ -42,11 +44,11 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
   }, [filteredPosts, visibleCount]);
 
   const handleRemove = (id: number) => {
-    setPosts(prev => prev.filter(p => p.id !== id));
+    setPosts((prev) => prev.filter((p) => p.id !== id));
   };
 
   const loadMore = () => {
-    setVisibleCount(prev => prev + 12);
+    setVisibleCount((prev) => prev + 12);
   };
 
   return (
@@ -77,7 +79,7 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
             ))}
           </div>
         </div>
-        
+
         <div className="flex flex-col gap-4 w-full md:w-auto">
           <span className="text-[10px] uppercase tracking-[0.2em] text-[#1a1a1a]/40 font-bold">
             Search saved items
@@ -90,8 +92,19 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
               viewBox="0 0 14 14"
               fill="none"
             >
-              <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M8.5 8.5l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <circle
+                cx="5.5"
+                cy="5.5"
+                r="4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M8.5 8.5l3.5 3.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
             <input
               type="text"
@@ -120,7 +133,7 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
 
       {/* Grid or Empty State */}
       {filteredPosts.length === 0 ? (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           className="py-24 text-center bg-[#f9f3dd]/20 border border-dashed border-[#d8c8a8] rounded-xl"
@@ -129,18 +142,22 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
             <Search className="text-[#1a1a1a]/20" size={32} />
           </div>
           <h2 className="text-2xl font-normal text-[#1a1a1a] mb-2 font-serif">
-            {searchQuery 
+            {searchQuery
               ? `No bookmarks found for "${searchQuery}"`
               : `No ${activeFilter === "all" ? "items" : activeFilter} found`}
           </h2>
           <p className="text-[#1a1a1a]/50 max-w-sm mx-auto text-sm leading-relaxed">
-            {activeFilter !== "all" 
+            {activeFilter !== "all"
               ? `You haven't bookmarked any items in the ${activeFilter} category yet.`
               : "Try searching for something else or browse the main feed to save more stories."}
           </p>
-          { (searchQuery || activeFilter !== "all") && (
+          {(searchQuery || activeFilter !== "all") && (
             <button
-              onClick={() => { setSearchQuery(""); setActiveFilter("all"); setVisibleCount(12); }}
+              onClick={() => {
+                setSearchQuery("");
+                setActiveFilter("all");
+                setVisibleCount(12);
+              }}
               className="mt-8 text-[11px] font-bold uppercase tracking-widest text-[#ff6b00] hover:underline"
             >
               Reset all filters
@@ -149,7 +166,7 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
         </motion.div>
       ) : (
         <>
-          <motion.div 
+          <motion.div
             layout
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >

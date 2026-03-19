@@ -1,12 +1,25 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import { HNItem } from "@/lib/hn-api";
 import { motion } from "framer-motion";
-import { ArrowRight, MessageSquare, ThumbsUp, Bookmark, BookmarkCheck } from "lucide-react";
+import {
+  ArrowRight,
+  MessageSquare,
+  ThumbsUp,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
 import { useState, useEffect, memo } from "react";
 import Link from "next/link";
-import { useBookmarks } from "@/app/BookmarkContext";
+import { useBookmarks } from "@/context/BookmarkContext";
 
-export const PostCard = memo(function PostCard({ post, onRemove }: { post: HNItem, onRemove?: (id: number) => void }) {
+export const PostCard = memo(function PostCard({
+  post,
+  onRemove,
+}: {
+  post: HNItem;
+  onRemove?: (id: number) => void;
+}) {
   const [mounted, setMounted] = useState(false);
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const isSaved = isBookmarked(post.id);
@@ -18,7 +31,7 @@ export const PostCard = memo(function PostCard({ post, onRemove }: { post: HNIte
   const handleToggleBookmark = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     await toggleBookmark(post);
     if (isSaved && onRemove) {
       onRemove(post.id);
@@ -67,7 +80,7 @@ export const PostCard = memo(function PostCard({ post, onRemove }: { post: HNIte
           by {post.by}
         </div>
         {post.descendants !== undefined && (
-          <Link 
+          <Link
             href={`/story/${post.id}`}
             onClick={(e) => e.stopPropagation()}
             className="px-4 border-r border-[#d8c8a8] flex items-center gap-1 text-[11px] font-medium text-[#1a1a1a]/60 hover:text-[#ff6b00] hover:bg-[#ff6b00]/5 transition-colors"
@@ -79,11 +92,17 @@ export const PostCard = memo(function PostCard({ post, onRemove }: { post: HNIte
         <button
           onClick={handleToggleBookmark}
           className={`px-4 flex items-center justify-center border-r border-[#d8c8a8] transition-colors ${
-            isSaved ? "text-[#ff6b00] bg-[#ff6b00]/5" : "text-[#1a1a1a]/40 hover:text-[#ff6b00] hover:bg-[#ff6b00]/3"
+            isSaved
+              ? "text-[#ff6b00] bg-[#ff6b00]/5"
+              : "text-[#1a1a1a]/40 hover:text-[#ff6b00] hover:bg-[#ff6b00]/3"
           }`}
           title={isSaved ? "Remove Bookmark" : "Save Bookmark"}
         >
-          {isSaved ? <BookmarkCheck size={16} fill="currentColor" /> : <Bookmark size={16} />}
+          {isSaved ? (
+            <BookmarkCheck size={16} fill="currentColor" />
+          ) : (
+            <Bookmark size={16} />
+          )}
         </button>
         <div className="w-10 flex items-center justify-center text-[#1a1a1a]/40 group-hover:text-white  group-hover:bg-[#ff6b00] transition-colors">
           <ArrowRight size={16} />

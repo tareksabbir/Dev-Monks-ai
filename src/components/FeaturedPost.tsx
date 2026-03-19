@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { HNItem } from "@/lib/hn-api";
 import { ArrowRight, Bookmark, BookmarkCheck } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useBookmarks } from "@/app/BookmarkContext";
+import { useBookmarks } from "@/context/BookmarkContext";
 
 const PAGE_GRID_STYLE = {
   backgroundImage: `
@@ -25,7 +26,7 @@ export function FeaturedPost({ post }: { post: HNItem }) {
   const handleToggleBookmark = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     await toggleBookmark(post);
   };
 

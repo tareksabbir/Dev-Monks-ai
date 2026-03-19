@@ -29,7 +29,9 @@ export interface HNComment {
   dead?: boolean;
 }
 
-export async function getStoryIds(type: 'top' | 'new' | 'best' | 'ask' | 'show' | 'job') {
+export async function getStoryIds(
+  type: "top" | "new" | "best" | "ask" | "show" | "job",
+) {
   const res = await fetch(`${HN_BASE}/${type}stories.json`);
   return res.json() as Promise<number[]>;
 }
@@ -42,44 +44,43 @@ export async function getItem(id: number): Promise<HNItem | null> {
 // Comments flatten করার function
 export async function fetchAllComments(ids: number[]): Promise<string[]> {
   const texts: string[] = [];
-  
+
   async function traverse(id: number) {
     const item = await getItem(id);
     if (!item) return;
-    if (item.text) texts.push(item.text.replace(/<[^>]*>/g, ''));
+    if (item.text) texts.push(item.text.replace(/<[^>]*>/g, ""));
     if (item.kids?.length) {
       await Promise.all(item.kids.slice(0, 10).map(traverse)); // limit
     }
   }
-  
+
   await Promise.all(ids.slice(0, 20).map(traverse));
   return texts;
 }
-
 
 // Tree structure বানানোর function
 export async function fetchCommentTree(
   ids: number[],
   depth: number = 0,
-  maxDepth: number = 4  // কতটা গভীর যাবে
+  maxDepth: number = 4, // কতটা গভীর যাবে
 ): Promise<HNComment[]> {
   if (!ids?.length || depth > maxDepth) return [];
 
   const items = await Promise.all(ids.slice(0, 10).map(getItem));
-  
+
   const comments = await Promise.all(
     items
       .filter((item): item is HNItem => !!item && !item.deleted && !item.dead)
       .map(async (item) => ({
         id: item.id,
         by: item.by,
-        text: item.text?.replace(/<[^>]*>/g, '') || '',
+        text: item.text?.replace(/<[^>]*>/g, "") || "",
         time: item.time,
         kids: item.kids,
         children: item.kids?.length
           ? await fetchCommentTree(item.kids, depth + 1, maxDepth)
           : [],
-      }))
+      })),
   );
 
   return comments;

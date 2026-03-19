@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+"use client";
 import { CATEGORIES } from "@/lib/data";
-import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 
 interface FilterBarProps {
   activeCategory: string;
@@ -8,7 +10,7 @@ interface FilterBarProps {
   setSearchQuery: (query: string) => void;
 }
 
-export function FilterBar({
+export const FilterBar = memo(function FilterBar({
   activeCategory,
   setActiveCategory,
   searchQuery,
@@ -54,7 +56,7 @@ export function FilterBar({
           ))}
         </div>
       </div>
-      
+
       <div className="flex flex-col gap-3 shrink-0 w-full md:w-auto">
         <span className="text-[10px] uppercase tracking-[0.2em] text-[#1a1a1a]/40 font-bold">
           Find stories
@@ -67,8 +69,19 @@ export function FilterBar({
             viewBox="0 0 14 14"
             fill="none"
           >
-            <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M8.5 8.5l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <circle
+              cx="5.5"
+              cy="5.5"
+              r="4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M8.5 8.5l3.5 3.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
           <input
             type="text"
@@ -81,4 +94,4 @@ export function FilterBar({
       </div>
     </div>
   );
-}
+});
