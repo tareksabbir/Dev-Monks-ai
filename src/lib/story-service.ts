@@ -8,7 +8,7 @@ export async function getStorySummary(storyId: number) {
     const summary = await prisma.summary.findUnique({
       where: { storyId },
     });
-    
+
     if (!summary) return null;
 
     return {

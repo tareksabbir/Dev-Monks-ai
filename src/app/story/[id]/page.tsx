@@ -1,5 +1,4 @@
 import { getItemWithComments } from "@/lib/hn-api";
-import { HNItem, HNComment } from "@/types";
 import CommentTree from "@/components/hn/CommentTree";
 import {
   ChevronLeft,
@@ -12,7 +11,6 @@ import {
 import Link from "next/link";
 import { getStorySummary } from "@/lib/story-service";
 import SummarizeButton from "@/components/hn/SummarizeButton";
-import { timeAgo } from "@/utils";
 import { notFound } from "next/navigation";
 
 export default async function StoryPage({

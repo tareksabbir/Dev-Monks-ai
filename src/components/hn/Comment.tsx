@@ -1,12 +1,8 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 import React, { useState, useEffect } from "react";
 import { HNComment } from "@/types";
-import {
-  ChevronDown,
-  ChevronRight,
-  User,
-  Clock,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, User, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { timeAgo } from "@/utils";
 

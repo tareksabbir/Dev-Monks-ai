@@ -2,7 +2,13 @@
 
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, RefreshCw, Home, Terminal, ChevronRight } from "lucide-react";
+import {
+  AlertTriangle,
+  RefreshCw,
+  Home,
+  Terminal,
+  ChevronRight,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function Error({
@@ -37,7 +43,8 @@ export default function Error({
           System Malfunction
         </h1>
         <p className="text-foreground/60 text-lg mb-12 max-w-md mx-auto leading-relaxed">
-          We encountered an unexpected error while processing your request. Our monks are working to fix the glitch.
+          We encountered an unexpected error while processing your request. Our
+          monks are working to fix the glitch.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mb-16">
@@ -67,7 +74,9 @@ export default function Error({
           </div>
           <div className="space-y-2">
             <p className="text-xs font-mono text-foreground/40 break-all bg-black/5 p-2 rounded">
-              <span className="text-red-600/60 uppercase font-bold mr-2">Error:</span>
+              <span className="text-red-600/60 uppercase font-bold mr-2">
+                Error:
+              </span>
               {error.message || "An unknown error occurred"}
             </p>
             {error.digest && (

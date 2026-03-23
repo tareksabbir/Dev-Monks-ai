@@ -44,7 +44,11 @@ export function countDescendants(comment: AlgoliaComment): number {
 }
 
 /** Score a comment based on quality signals (higher = more important) */
-export function scoreComment(text: string, depth: number, replyCount: number): number {
+export function scoreComment(
+  text: string,
+  depth: number,
+  replyCount: number,
+): number {
   let score = 0;
 
   // 1. Reply count — comments that sparked discussion are more important

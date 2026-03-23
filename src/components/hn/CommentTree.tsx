@@ -1,17 +1,7 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
-import React, { useState, useEffect, memo } from "react";
+
 import { HNComment } from "@/types";
-import {
-  ChevronDown,
-  ChevronRight,
-  User,
-  Clock,
-  MessageSquare,
-  Calendar,
-} from "lucide-react";
-import { timeAgo } from "@/utils";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { Comment } from "./Comment";
 
 export default function CommentTree({ comments }: { comments: HNComment[] }) {

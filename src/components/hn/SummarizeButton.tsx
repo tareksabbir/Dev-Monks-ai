@@ -1,9 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Sparkles, Loader2, RefreshCw, ChevronDown, ChevronUp, Brain, CheckCircle2, Trash2, AlertTriangle } from "lucide-react";
+import {
+  Sparkles,
+  Loader2,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+} from "lucide-react";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { SummaryData } from "@/types";
 import { AISummaryCard } from "./AISummaryCard";
@@ -13,7 +19,10 @@ interface SummarizeButtonProps {
   initialSummary?: SummaryData | null;
 }
 
-export default function SummarizeButton({ storyId, initialSummary }: SummarizeButtonProps) {
+export default function SummarizeButton({
+  storyId,
+  initialSummary,
+}: SummarizeButtonProps) {
   const [expanded, setExpanded] = useState(!!initialSummary);
   const [isPolling, setIsPolling] = useState(false);
   const queryClient = useQueryClient();
@@ -21,10 +30,7 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
   // ──────────────────────────────────────────────
   // GET: Poll for summary status (TanStack Query)
   // ──────────────────────────────────────────────
-  const {
-    data: polledSummary,
-    error: pollError,
-  } = useQuery({
+  const { data: polledSummary, error: pollError } = useQuery({
     queryKey: ["summary", storyId],
     queryFn: async (): Promise<SummaryData | null> => {
       const res = await fetch(`/api/stories/${storyId}/summarize`);
@@ -78,7 +84,9 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || data.error || "Failed to start summarization");
+        throw new Error(
+          data.message || data.error || "Failed to start summarization",
+        );
       }
 
       return data;
@@ -132,7 +140,10 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
   };
 
   const loading = summarizeMutation.isPending || isPolling;
-  const error = summarizeMutation.error?.message || deleteMutation.error?.message || (pollError ? "Polling failed. Please try again." : null);
+  const error =
+    summarizeMutation.error?.message ||
+    deleteMutation.error?.message ||
+    (pollError ? "Polling failed. Please try again." : null);
 
   // Premium AI Generation Animation
   if (loading && !summary) {
@@ -140,24 +151,27 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
       <div className="mb-12 animate-in fade-in duration-500">
         <div className="bg-secondary border-2 border-dashed border-primary/30 p-10 rounded-sm shadow-[8px_8px_0px_rgba(255,107,0,0.1)] relative overflow-hidden">
           {/* Moving Gradient Background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-          
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-primary/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+
           <div className="flex flex-col items-center text-center relative z-10">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 animate-pulse">
               <Sparkles size={32} className="text-primary" />
             </div>
-            <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight">AI Agent Analysis in Progress</h3>
+            <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight">
+              AI Agent Analysis in Progress
+            </h3>
             <p className="text-foreground/60 text-sm max-w-md mx-auto leading-relaxed">
-              Our agent is reading through the discussion, identifying key debates, and extracting the most important insights for you.
+              Our agent is reading through the discussion, identifying key
+              debates, and extracting the most important insights for you.
             </p>
-            
+
             <div className="mt-8 flex gap-2">
               <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
               <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
               <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
             </div>
           </div>
-          
+
           {/* Skeleton lines to simulate reading */}
           <div className="mt-12 space-y-4 opacity-20">
             <div className="h-3 bg-foreground rounded-full w-3/4 animate-pulse"></div>
@@ -182,11 +196,15 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
           {expanded ? "Hide AI Insights" : "View AI Insights"}
           <span
             className="inline-block w-2 h-2 rounded-full ml-1"
-            style={{ 
-              backgroundColor: 
-                summary.sentiment.toLowerCase() === "positive" ? "var(--sentiment-positive)" :
-                summary.sentiment.toLowerCase() === "negative" ? "var(--sentiment-negative)" :
-                summary.sentiment.toLowerCase() === "mixed" ? "var(--sentiment-mixed)" : "var(--sentiment-neutral)"
+            style={{
+              backgroundColor:
+                summary.sentiment.toLowerCase() === "positive"
+                  ? "var(--sentiment-positive)"
+                  : summary.sentiment.toLowerCase() === "negative"
+                    ? "var(--sentiment-negative)"
+                    : summary.sentiment.toLowerCase() === "mixed"
+                      ? "var(--sentiment-mixed)"
+                      : "var(--sentiment-neutral)",
             }}
           />
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -194,9 +212,9 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
 
         {expanded && (
           <div className="mt-6">
-            <AISummaryCard 
-              summary={summary.summary} 
-              keyPoints={summary.keyPoints} 
+            <AISummaryCard
+              summary={summary.summary}
+              keyPoints={summary.keyPoints}
               sentiment={summary.sentiment}
             >
               <div className="flex items-center justify-between">
@@ -244,22 +262,21 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
       >
         {loading ? (
           <>
-            <Loader2 size={18} className="animate-spin" /> 
+            <Loader2 size={18} className="animate-spin" />
             <span className="ml-2">Analyzing Discussion...</span>
           </>
         ) : (
           <>
-            Summarize with AI 
-            <Sparkles size={18} className="text-primary group-hover:scale-110 transition-transform" />
+            Summarize with AI
+            <Sparkles
+              size={18}
+              className="text-primary group-hover:scale-110 transition-transform"
+            />
           </>
         )}
       </button>
       {error && (
-        <ErrorAlert 
-          title="Analysis Error"
-          message={error}
-          className="mt-6"
-        />
+        <ErrorAlert title="Analysis Error" message={error} className="mt-6" />
       )}
     </div>
   );

@@ -29,33 +29,37 @@ const AI_TIMEOUT_MS = 30000; // 30 seconds
 export async function generateSummary(
   title: string,
   comments: string,
-  totalComments: number
+  totalComments: number,
 ): Promise<SummaryData> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer":
+            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        },
+        body: JSON.stringify({
+          model: process.env.AI_MODEL || "nvidia/nemotron-3-nano-30b-a3b:free",
+          temperature: 0.1,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            {
+              role: "user",
+              content: `Story Title: ${title}\nTotal Comments: ${totalComments}\n\nDiscussion Content:\n${comments}`,
+            },
+          ],
+          response_format: { type: "json_object" },
+        }),
+        signal: controller.signal,
       },
-      body: JSON.stringify({
-        model: process.env.AI_MODEL || "nvidia/nemotron-3-nano-30b-a3b:free",
-        temperature: 0.1,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `Story Title: ${title}\nTotal Comments: ${totalComments}\n\nDiscussion Content:\n${comments}`,
-          },
-        ],
-        response_format: { type: "json_object" },
-      }),
-      signal: controller.signal,
-    });
+    );
 
     clearTimeout(timeoutId);
 

@@ -10,7 +10,7 @@ interface SummarizeRequestBody {
 // POST: Trigger summarization (with optional force re-summarize)
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const storyId = Number(id);
@@ -45,35 +45,36 @@ export async function POST(
       data: { storyId, force },
     });
 
-    return NextResponse.json({ 
-      status: "processing", 
-      message: "Summarization started" 
+    return NextResponse.json({
+      status: "processing",
+      message: "Summarization started",
     });
   } catch (error: any) {
     console.error("Failed to trigger summarization:", error);
 
     // Specific handling for Inngest connection issues (ECONNREFUSED)
-    const isConnError = 
-      error?.message?.includes("fetch failed") || 
+    const isConnError =
+      error?.message?.includes("fetch failed") ||
       error?.cause?.code === "ECONNREFUSED" ||
       error?.code === "ECONNREFUSED";
 
     if (isConnError) {
       return NextResponse.json(
-        { 
+        {
           error: "Background service unreachable",
           message: "The summarization engine is currently offline.",
-          suggestion: process.env.NODE_ENV === "development" 
-            ? "Ensure Inngest Dev Server is running: 'npx inngest-cli@latest dev'"
-            : "Please try again in a few minutes."
-        }, 
-        { status: 503 }
+          suggestion:
+            process.env.NODE_ENV === "development"
+              ? "Ensure Inngest Dev Server is running: 'npx inngest-cli@latest dev'"
+              : "Please try again in a few minutes.",
+        },
+        { status: 503 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to initiate analysis", message: error.message }, 
-      { status: 500 }
+      { error: "Failed to initiate analysis", message: error.message },
+      { status: 500 },
     );
   }
 }
@@ -81,7 +82,7 @@ export async function POST(
 // GET: Check summary status / fetch existing summary (for polling)
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const storyId = Number(id);
@@ -110,7 +111,7 @@ export async function GET(
     console.error("Failed to fetch summary:", error);
     return NextResponse.json(
       { error: "Failed to check analysis status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -118,7 +119,7 @@ export async function GET(
 // DELETE: Remove summary from database
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const storyId = Number(id);
@@ -135,6 +136,9 @@ export async function DELETE(
   } catch (error) {
     console.error("Failed to delete summary:", error);
     // If it doesn't exist, that's also fine (already "deleted")
-    return NextResponse.json({ status: "success", message: "Summary already removed or not found" });
+    return NextResponse.json({
+      status: "success",
+      message: "Summary already removed or not found",
+    });
   }
 }

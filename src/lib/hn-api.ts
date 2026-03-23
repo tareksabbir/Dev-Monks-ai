@@ -21,7 +21,7 @@ export async function getItemWithComments(
     // Parallel fetch: Item tree + Search metadata (for consistent counts/scores)
     const [itemRes, searchRes] = await Promise.all([
       fetch(`${ALGOLIA_BASE}/items/${id}`),
-      fetch(`${ALGOLIA_BASE}/search?tags=story,story_${id}`)
+      fetch(`${ALGOLIA_BASE}/search?tags=story,story_${id}`),
     ]);
 
     if (!itemRes.ok) return null;
@@ -38,7 +38,8 @@ export async function getItemWithComments(
 
     const story: HNItem = {
       id: data.id,
-      type: (searchHit?.type as HNItem["type"]) || (data.type as HNItem["type"]),
+      type:
+        (searchHit?.type as HNItem["type"]) || (data.type as HNItem["type"]),
       by: searchHit?.author || data.author || "unknown",
       time: searchHit?.created_at_i || data.created_at_i,
       title: searchHit?.title || data.title,
@@ -46,7 +47,11 @@ export async function getItemWithComments(
       url: searchHit?.url || data.url || "",
       score: searchHit?.points ?? data.points ?? 0,
       // Search API-র num_comments ব্যবহার করো যদি পাওয়া যায়, নাহলে ম্যানুয়ালি গুনো
-      descendants: searchHit?.num_comments ?? (data.children ? data.children.reduce((sum, c) => sum + 1 + countDescendants(c), 0) : 0),
+      descendants:
+        searchHit?.num_comments ??
+        (data.children
+          ? data.children.reduce((sum, c) => sum + 1 + countDescendants(c), 0)
+          : 0),
       kids: data.children?.map((c) => c.id) || [],
     };
 

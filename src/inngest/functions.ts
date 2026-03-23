@@ -2,7 +2,6 @@ import { inngest } from "./client";
 import { fetchCommentsForAI, getItemWithComments } from "@/lib/hn-api";
 import { generateSummary } from "@/lib/ai-service";
 import { prisma } from "@/lib/prisma";
-import { HNItem, HNComment } from "@/types";
 
 export const summarizeDiscussion = inngest.createFunction(
   {
@@ -24,7 +23,7 @@ export const summarizeDiscussion = inngest.createFunction(
           return await prisma.summary.findUnique({
             where: { storyId },
           });
-        }
+        },
       );
 
       if (existingSummary) return existingSummary;
@@ -33,8 +32,9 @@ export const summarizeDiscussion = inngest.createFunction(
     // Step 2: HN API থেকে story details আনো (Algolia based)
     const storyData = await step.run("fetch-story-details", async () => {
       const result = await getItemWithComments(storyId);
-      if (!result || !result.story) throw new Error(`Story ${storyId} not found on Hacker News`);
-      
+      if (!result || !result.story)
+        throw new Error(`Story ${storyId} not found on Hacker News`);
+
       return {
         title: result.story.title || "Untitled",
         descendants: result.story.descendants || 0,
@@ -73,7 +73,7 @@ export const summarizeDiscussion = inngest.createFunction(
       return await generateSummary(
         storyData.title || "Untitled",
         comments,
-        storyData.descendants || 0
+        storyData.descendants || 0,
       );
     });
 
@@ -96,5 +96,5 @@ export const summarizeDiscussion = inngest.createFunction(
     });
 
     return savedSummary;
-  }
+  },
 );

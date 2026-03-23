@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Remove HTML tags from a string and decode common HTML entities
  */

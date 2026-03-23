@@ -30,11 +30,11 @@ export async function GET(req: NextRequest) {
 
       const algoliaUrl = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=${tags}&page=${page}&hitsPerPage=12`;
       const res = await fetch(algoliaUrl);
-      
+
       if (!res.ok) {
         throw new Error(`Algolia search failed with status ${res.status}`);
       }
-      
+
       const data: { hits: AlgoliaHit[] } = await res.json();
       return Response.json(mapAlgoliaHits(data.hits));
     }
@@ -42,9 +42,12 @@ export async function GET(req: NextRequest) {
     // Case 2: "All" category or specific type browsing
     const storyType = type === "all" || !type ? "new" : type;
     const stories = await getStoriesByType(storyType, page);
-    
+
     if (!stories) {
-      return Response.json({ error: "Failed to fetch stories" }, { status: 500 });
+      return Response.json(
+        { error: "Failed to fetch stories" },
+        { status: 500 },
+      );
     }
 
     return Response.json(stories);
@@ -52,8 +55,7 @@ export async function GET(req: NextRequest) {
     console.error("API stories error:", error);
     return Response.json(
       { error: "An unexpected error occurred while fetching stories" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

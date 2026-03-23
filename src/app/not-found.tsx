@@ -15,7 +15,7 @@ export default function NotFound() {
       >
         {/* Decorative background element */}
         <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full -z-10" />
-        
+
         <div className="w-24 h-24 bg-secondary border-2 border-card-border rounded-2xl flex items-center justify-center text-primary relative shadow-[8px_8px_0px_var(--card-shadow)] mb-8 mx-auto">
           <FileQuestion size={48} strokeWidth={1.5} />
           <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-[10px] font-bold">
@@ -27,7 +27,8 @@ export default function NotFound() {
           404: Story Not Found
         </h1>
         <p className="text-foreground/60 max-w-md mx-auto text-lg leading-relaxed">
-          The page you are looking for has been archived, moved, or never existed in the first place.
+          The page you are looking for has been archived, moved, or never
+          existed in the first place.
         </p>
       </motion.div>
 
@@ -52,7 +53,10 @@ export default function NotFound() {
           onClick={() => window.history.back()}
           className="flex items-center gap-2 px-8 py-4 text-foreground/60 hover:text-primary font-bold text-sm uppercase tracking-widest transition-colors group"
         >
-          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft
+            size={16}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
           Go Back
         </button>
       </motion.div>

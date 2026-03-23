@@ -12,21 +12,30 @@ import { FooterCTA } from "@/components/layout/FooterCTA";
 import { useStories, useFeaturedStory } from "@/hooks/useStories";
 import { HNItem } from "@/types";
 import { useMemo, useCallback } from "react";
-import { Search, RotateCcw } from "lucide-react";
+import { Search } from "lucide-react";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { getHNType } from "@/utils/hn";
-
-
 
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useStories(getHNType(activeCategory), searchQuery);
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useStories(getHNType(activeCategory), searchQuery);
 
-  const { data: featuredPost, isLoading: isFeaturedLoading, isError: isFeaturedError, refetch: refetchFeatured } =
-    useFeaturedStory();
+  const {
+    data: featuredPost,
+    isLoading: isFeaturedLoading,
+    isError: isFeaturedError,
+    refetch: refetchFeatured,
+  } = useFeaturedStory();
 
   const allPosts = useMemo(
     () => (data?.pages.flat() || []) as HNItem[],
@@ -47,7 +56,7 @@ export default function BlogPage() {
           <FeaturedPostSkeleton />
         ) : isFeaturedError ? (
           <div className="w-full max-w-7xl px-6 lg:px-0 mb-12">
-            <ErrorAlert 
+            <ErrorAlert
               title="Featured Content Unavailable"
               message="We couldn't retrieve the featured monk's pick. You might want to try again."
               onRetry={refetchFeatured}
@@ -68,7 +77,7 @@ export default function BlogPage() {
           <div className="min-h-150">
             {isError ? (
               <div className="py-20 flex flex-col items-center justify-center">
-                <ErrorAlert 
+                <ErrorAlert
                   title="Story Feed Interrupted"
                   message="We're having trouble reaching the Hacker News servers. Please check your connection and try again."
                   onRetry={refetch}
@@ -137,7 +146,8 @@ export default function BlogPage() {
                       No matching stories found
                     </h2>
                     <p className="text-foreground/50 max-w-sm mx-auto text-sm leading-relaxed mb-8">
-                      We couldn&#39;t find any stories for &quot;{searchQuery}&quot; in the {activeCategory} category.
+                      We couldn&#39;t find any stories for &quot;{searchQuery}
+                      &quot; in the {activeCategory} category.
                     </p>
                     <button
                       onClick={() => {
