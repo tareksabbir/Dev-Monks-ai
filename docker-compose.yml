@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:16-alpine
@@ -31,7 +30,7 @@ services:
       INNGEST_DEV: 1
       INNGEST_EVENT_KEY: "local"
       NODE_ENV: production
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-sk-placeholder}
+      OPENROUTER_API_KEY: "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" # Intentionally provided for evaluation purposes
       NEXT_PUBLIC_APP_URL: http://localhost:3000
     depends_on:
       db:
