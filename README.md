@@ -1,158 +1,365 @@
-# Dev Monks — AI-Powered Hacker News Reader
+<div align="center">
 
-A modern, beautifully-designed Hacker News reader with AI-powered discussion summarization. Built as a full-stack application using Next.js 16, it fetches real-time stories from Hacker News, allows users to bookmark them, and uses an AI agent to generate intelligent summaries of comment discussions.
+<img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=nextdotjs&logoColor=white" />
+<img src="https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript&logoColor=white" />
+<img src="https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql&logoColor=white" />
+<img src="https://img.shields.io/badge/Prisma-7-2D3748?style=for-the-badge&logo=prisma&logoColor=white" />
+<img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+<img src="https://img.shields.io/badge/TailwindCSS-4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" />
 
-> **Quick Start:** `docker compose up --build` → Open [http://localhost:3000](http://localhost:3000)
+# 🧠 Dev Monks — AI-Powered Hacker News Reader
 
----
+**A modern, beautifully designed Hacker News reader with AI-powered discussion summarization.**  
+Browse top stories, save bookmarks, and let an AI agent distill thousands of comments into structured, actionable insights — all in one sleek interface.
 
-## Table of Contents
-
-- [Tech Stack](#tech-stack)
-- [Architecture & System Design](#architecture--system-design)
-- [Data Flow](#data-flow)
-- [Getting Started](#getting-started)
-- [Approach & Design Decisions](#approach--design-decisions)
-- [Tradeoffs](#tradeoffs)
-- [Future Improvements](#future-improvements)
+[🚀 Quick Start](#-getting-started) • [🏗️ Architecture](#️-architecture--system-design) • [🤖 AI Agent](#-the-ai-summarization-agent) • [📦 Tech Stack](#-tech-stack) • [🗂️ Data Modeling](#️-data-modeling-deep-dive) • [🔮 Roadmap](#-future-improvements)
 
 ---
 
-## Tech Stack
+> **One-command setup:**
+> ```bash
+> docker compose up --build
+> ```
+> Then open [http://localhost:3000](http://localhost:3000)
 
-| Layer | Technology | Why |
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [✨ Features](#-features)
+- [📦 Tech Stack](#-tech-stack)
+- [🏗️ Architecture & System Design](#️-architecture--system-design)
+- [🔄 Data Flow](#-data-flow)
+- [🗂️ Data Modeling Deep-Dive](#️-data-modeling-deep-dive)
+- [🤖 The AI Summarization Agent](#-the-ai-summarization-agent)
+- [🚀 Getting Started](#-getting-started)
+- [🧠 Approach & Design Decisions](#-approach--design-decisions)
+- [⚖️ Tradeoffs](#️-tradeoffs)
+- [🔮 Future Improvements](#-future-improvements)
+- [📁 Project Structure](#-project-structure)
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 📰 **Live Story Feed** | Real-time Hacker News top/new/best stories with infinite scroll |
+| 🔖 **Instant Bookmarks** | Save stories frictionlessly with zero sign-up required |
+| 🤖 **AI Discussion Summarization** | One-click AI summary of comment threads with key points & sentiment |
+| ⚡ **Optimistic UI** | Instant visual feedback with automatic rollback on errors |
+| 🔁 **Durable Background Jobs** | AI pipeline with automatic retries and step-based checkpointing |
+| 🧩 **Shared AI Intelligence** | Summaries are computed once and shared across all users |
+| 📱 **Responsive Design** | Tailwind CSS-powered layout with Framer Motion animations |
+| 🐳 **One-Command Deployment** | Full stack via Docker Compose — no manual setup required |
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+### Home Feed
+![Home Feed](public/home.png)
+
+### Story Discussion & AI Summary
+![Story Discussion](public/comment.png)
+
+### Personal Bookmarks
+![Bookmarks](public/bookmark.png)
+
+</div>
+
+---
+
+---
+
+## 📦 Tech Stack
+
+| Layer | Technology | Why We Chose It |
 |---|---|---|
-| **Framework** | Next.js 16 (App Router) | Server Components, Server Actions, API Routes in one framework |
-| **Language** | TypeScript | Type safety across the entire stack |
-| **Database** | PostgreSQL 16 + Prisma 7 | Reliable relational DB with type-safe ORM |
-| **Data Source** | Algolia HN API | Single-request fetching of stories + all nested comments (10-20x faster than official Firebase API) |
-| **AI Engine** | OpenRouter (nvidia/nemotron-3-nano) | Free-tier LLM access with structured JSON output |
-| **Background Jobs** | Inngest | Durable, step-based functions with automatic retries for AI summarization pipeline |
-| **State Management** | React Query (TanStack) | Server state caching, infinite scroll pagination, and optimistic updates |
-| **Styling** | Tailwind CSS 4 | Utility-first CSS with custom design system |
-| **Animations** | Framer Motion | Smooth page transitions and micro-interactions |
-| **Icons** | Lucide React | Consistent, lightweight icon set |
-| **Containerization** | Docker + Docker Compose | One-command deployment with all services |
+| **Framework** | [Next.js 16](https://nextjs.org/) (App Router) | Server Components, Server Actions, and API Routes all in one — no separate backend needed |
+| **Language** | TypeScript | End-to-end type safety across client, server, and database |
+| **Database** | PostgreSQL 16 + [Prisma 7](https://www.prisma.io/) | Reliable relational DB with type-safe ORM, migrations, and connection pooling |
+| **Data Source** | [Algolia HN Search API](https://hn.algolia.com/api) | Fetches full comment trees in a **single request** — 10–20× faster than the official Firebase API |
+| **AI Engine** | [OpenRouter](https://openrouter.ai/) (`nvidia/nemotron-3-nano`) | Free-tier LLM with structured JSON output and strong technical reasoning |
+| **Background Jobs** | [Inngest](https://www.inngest.com/) | Durable, step-based functions with automatic retries, observability, and no infra to manage |
+| **State Management** | [React Query (TanStack)](https://tanstack.com/query) | Server state caching, infinite scroll, and optimistic mutations out of the box |
+| **Styling** | Tailwind CSS 4 | Utility-first CSS with a custom design system and zero runtime cost |
+| **Animations** | [Framer Motion](https://www.framer.com/motion/) | Smooth page transitions, micro-interactions, and gesture support |
+| **Icons** | [Lucide React](https://lucide.dev/) | Consistent, tree-shakeable, lightweight icon library |
+| **Containerization** | Docker + Docker Compose | Single command to spin up app + Postgres + Inngest Dev Server |
 
 ---
 
-## Architecture & System Design
+## 🏗️ Architecture & System Design
+
+Dev Monks is a **monolithic Next.js app** that integrates external services for AI and job orchestration, with a containerized Postgres database. All services run inside Docker Compose for local development.
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                        DOCKER COMPOSE                            │
-│                                                                  │
-│  ┌─────────────────────────────────────────────────────────┐     │
-│  │                   Next.js App (:3000)                   │     │
-│  │                                                          │     │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌───────────────┐  │     │
-│  │  │  App Router   │  │  API Routes  │  │Server Actions │  │     │
-│  │  │  (SSR Pages)  │  │  /api/*      │  │  (Bookmarks)  │  │     │
-│  │  └──────┬───────┘  └──────┬───────┘  └───────┬───────┘  │     │
-│  │         │                  │                   │          │     │
-│  │  ┌──────▼──────────────────▼───────────────────▼───────┐  │     │
-│  │  │              Shared Libraries                       │  │     │
-│  │  │  hn-api.ts │ ai-service.ts │ prisma.ts │ data.ts   │  │     │
-│  │  └──────┬───────────┬──────────────────┬──────────────┘  │     │
-│  └─────────┼───────────┼──────────────────┼─────────────────┘     │
-│            │           │                  │                        │
-│  ┌─────────▼──┐  ┌─────▼──────┐  ┌───────▼────────┐              │
-│  │ Algolia HN │  │ OpenRouter │  │  PostgreSQL    │              │
-│  │   API      │  │   (AI)     │  │  (:5432)      │              │
-│  │ (External) │  │ (External) │  │  [Bookmarks]  │              │
-│  └────────────┘  └────────────┘  │  [Summaries]  │              │
-│                                  └────────────────┘              │
-│  ┌──────────────────────────────────┐                            │
-│  │   Inngest Dev Server (:8288)     │                            │
-│  │   Background Job Orchestrator    │                            │
-│  │   ┌────────────────────────────┐ │                            │
-│  │   │ summarize-discussion fn   │ │                            │
-│  │   │  Step 1: Check existing   │ │                            │
-│  │   │  Step 2: Fetch story      │ │                            │
-│  │   │  Step 3: Fetch comments   │ │                            │
-│  │   │  Step 4: AI summarize     │ │                            │
-│  │   │  Step 5: Save to DB       │ │                            │
-│  │   └────────────────────────────┘ │                            │
-│  └──────────────────────────────────┘                            │
-└──────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                         DOCKER COMPOSE                             │
+│                                                                    │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │                    Next.js App  (:3000)                      │  │
+│  │                                                              │  │
+│  │  ┌─────────────────┐  ┌────────────────┐  ┌──────────────┐  │  │
+│  │  │  App Router      │  │  API Routes    │  │Server Actions│  │  │
+│  │  │  (SSR Pages)     │  │  /api/*        │  │ (Bookmarks)  │  │  │
+│  │  └────────┬─────────┘  └───────┬────────┘  └──────┬───────┘  │  │
+│  │           │                    │                   │          │  │
+│  │  ┌────────▼────────────────────▼───────────────────▼────────┐ │  │
+│  │  │                   Shared Libraries                       │ │  │
+│  │  │   hn-api.ts │ ai-service.ts │ prisma.ts │ data.ts        │ │  │
+│  │  └────────┬───────────────┬────────────────────┬────────────┘ │  │
+│  └───────────┼───────────────┼────────────────────┼──────────────┘  │
+│              │               │                    │                  │
+│  ┌───────────▼──┐  ┌─────────▼─────┐  ┌──────────▼──────────────┐  │
+│  │ Algolia HN   │  │  OpenRouter   │  │      PostgreSQL          │  │
+│  │ Search API   │  │  (LLM / AI)   │  │        (:5432)           │  │
+│  │  (External)  │  │  (External)   │  │  ┌─────────────────────┐ │  │
+│  │              │  │               │  │  │  Bookmarks Table    │ │  │
+│  └──────────────┘  └───────────────┘  │  │  Summaries Table    │ │  │
+│                                       │  └─────────────────────┘ │  │
+│                                       └─────────────────────────────┘  │
+│                                                                    │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │               Inngest Dev Server  (:8288)                   │  │
+│  │               Background Job Orchestrator                   │  │
+│  │                                                             │  │
+│  │   ┌─────────────────────────────────────────────────────┐  │  │
+│  │   │          summarize-discussion (Durable Fn)          │  │  │
+│  │   │                                                     │  │  │
+│  │   │   Step 1 ──► Check DB for existing summary         │  │  │
+│  │   │   Step 2 ──► Fetch story metadata from Algolia     │  │  │
+│  │   │   Step 3 ──► Fetch & flatten comment tree          │  │  │
+│  │   │   Step 4 ──► Send to OpenRouter LLM               │  │  │
+│  │   │   Step 5 ──► Upsert result to PostgreSQL           │  │  │
+│  │   └─────────────────────────────────────────────────────┘  │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Key Components
 
-| Component | Responsibility |
+| Component | File(s) | Responsibility |
+|---|---|---|
+| **Home Feed** | `app/page.tsx` | Infinite-scroll story listing with React Query |
+| **Story Detail** | `app/story/[id]/` | Full comment tree + AI summary trigger |
+| **Bookmarks Page** | `app/bookmarks/` | Saved story list with snapshot data |
+| **Story API** | `api/stories/` | Paginated feed, featured story, and summarize endpoints |
+| **Inngest Endpoint** | `api/inngest/` | Webhook receiver for background job events |
+| **Server Actions** | `actions/bookmarks.ts` | Toggle, list, and check bookmark state |
+| **Summarize Function** | `inngest/summarize-discussion` | 5-step durable AI pipeline |
+| **Prisma Models** | `prisma/schema.prisma` | `Bookmark` + `Summary` with composite constraints |
+
+---
+
+## 🔄 Data Flow
+
+### 1. 📖 Story Browsing (Read Path)
+
+```
+User visits page
+  └─► React Query (useStories hook)
+        └─► GET /api/stories?type=top&page=0
+              └─► Algolia HN Search API
+                    └─► Returns stories + metadata (author, score, comments count, url)
+  └─► Cached in React Query (stale: 2min, GC: 10min)
+  └─► Rendered with virtual infinite scroll pagination
+```
+
+### 2. 🤖 AI Summarization (Write Path)
+
+```
+User clicks "Summarize Discussion"
+  └─► POST /api/stories/[id]/summarize
+        └─► Triggers Inngest event: "story/summarize.requested"
+              ├─► Step 1: Query DB — return instantly if summary exists
+              ├─► Step 2: Fetch story from Algolia
+              ├─► Step 3: Flatten comment tree (max 200 comments, depth 3)
+              ├─► Step 4: Prompt OpenRouter LLM → structured JSON response
+              └─► Step 5: Upsert Summary into PostgreSQL
+
+  Meanwhile: UI polls GET /api/stories/[id]/summarize every 2 seconds
+    └─► Displays <AISummaryCard> with key points once available
+```
+
+### 3. 🔖 Bookmarking (Optimistic Write Path)
+
+```
+User clicks bookmark icon
+  └─► BookmarkContext applies optimistic state update (instant UI)
+        └─► Server Action: toggleBookmark(storyId)
+              ├─► Prisma: Check existing → Create or Delete record
+              ├─► Stores metadata snapshot (title, url, score, author, time)
+              └─► Revalidates: /, /bookmarks, /story/[id]
+        └─► On error: Rollback optimistic state automatically
+```
+
+---
+
+## 🗂️ Data Modeling Deep-Dive
+
+The schema is intentionally lean — designed for **performance**, **cross-user AI sharing**, and **per-user personalization without auth complexity**.
+
+### 1. 🪪 Anonymous User Strategy
+
+Instead of a full authentication system, Dev Monks uses a **cookie-based anonymous user ID**:
+
+- On first visit, a unique `userId` UUID is generated and stored in a **secure, HTTP-only cookie**.
+- `Bookmark` records use a composite unique constraint: `@@unique([storyId, userId])`, ensuring each user has independent bookmarks without a user table.
+- **Zero friction:** Users get persistent bookmarks instantly, with a clear upgrade path to real accounts later (just replace the cookie ID with an authenticated user ID).
+
+### 2. 📸 The Bookmark Snapshot Pattern
+
+When a story is bookmarked, we don't just store a foreign key. We capture a **point-in-time snapshot** of the story's metadata:
+
+```
+Bookmark {
+  id          String   @id
+  storyId     String
+  userId      String   (from cookie)
+  title       String   ← snapshot
+  url         String?  ← snapshot
+  score       Int      ← snapshot
+  author      String   ← snapshot
+  time        DateTime ← snapshot
+  createdAt   DateTime @default(now())
+  @@unique([storyId, userId])
+}
+```
+
+**Why?** HN stories can be flagged, deleted, or modified at any time. Snapshots ensure bookmarks remain stable and readable even if the upstream data changes or disappears.
+
+### 3. 🧠 The Summary Cache Model
+
+```
+Summary {
+  id          String   @id
+  storyId     String   @unique   ← one summary per story, globally
+  title       String
+  overview    String
+  keyPoints   Json     ← stored as JSON array for structured rendering
+  sentiment   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+```
+
+Key design decisions:
+- **`storyId` is a unique index** — only one AI summary is ever generated per story.
+- **Shared intelligence** — because AI analysis of technical discussions is objective, all users share the same summary. If User A triggers it, User B sees it instantly for free.
+- **`keyPoints` as JSON** — enables the UI to render structured bullet points rather than parsing plain text.
+- **Upsert on write** — prevents duplicate summaries even if multiple users click "Summarize" simultaneously.
+
+---
+
+## 🤖 The AI Summarization Agent
+
+The AI agent isn't a simple API call — it's a **Durable Agentic Workflow** built on Inngest with a strict analytical persona.
+
+### 1. 🎭 The "Elite Analyst" Persona
+
+The agent is configured via a carefully engineered **system prompt** that defines its role as an *Elite Hacker News Analyst*:
+
+- **Mission:** Extract technical signal from social noise.
+- **Directives:**
+  - Identify contrarian and dissenting viewpoints
+  - Map technical debates and unresolved disagreements
+  - Answer "The So What?" — why this discussion matters to engineers
+  - Call out hype vs. substance
+- **Constraints:**
+  - Temperature `0.1` for high determinism and consistency
+  - Strict JSON output schema to prevent UI breakage
+  - Hard cap on tokens to stay within context windows
+
+### 2. ⚙️ Durable Execution with Inngest
+
+AI pipelines fail — networks time out, LLMs rate-limit, databases hiccup. **Inngest** makes the pipeline resilient:
+
+| Feature | Benefit |
 |---|---|
-| **App Router Pages** | `page.tsx` (Home feed), `story/[id]` (Story detail + comments), `bookmarks/` (Saved stories) |
-| **API Routes** | `/api/stories` (Paginated story feed), `/api/stories/featured` (Top story), `/api/stories/[id]/summarize` (Trigger/poll AI summary) |
-| **Server Actions** | `bookmarks.ts` — Toggle, list, and check bookmark state with optimistic UI |
-| **Inngest Functions** | `summarize-discussion` — 5-step durable function for AI summarization |
-| **Prisma Models** | `Bookmark` (per-user story saves), `Summary` (AI-generated discussion analysis) |
+| **Step-based execution** | Each step is independently retried on failure — a failed DB write doesn't re-run the LLM |
+| **Automatic retries** | Exponential backoff on transient failures (network errors, rate limits) |
+| **Event-driven trigger** | Decoupled from the HTTP request — the UI doesn't wait for the LLM |
+| **Observability dashboard** | Real-time job status, step-by-step logs at `localhost:8288` |
+| **Idempotency** | Safe to trigger the same summary multiple times — Step 1 exits early if it already exists |
 
----
+### 3. 🔢 The 5-Step Agent Pipeline
 
-## Data Flow
-
-### 1. Story Browsing (Read Path)
 ```
-User → React Query (useStories hook)
-  → GET /api/stories?type=top&page=0
-    → Algolia HN Search API
-      → Returns stories with metadata
-  → Cached in React Query (2 min stale, 10 min GC)
-  → Rendered with infinite scroll pagination
-```
-
-### 2. AI Summarization (Write Path)
-```
-User clicks "Summarize" → POST /api/stories/[id]/summarize
-  → Inngest event: "story/summarize.requested"
-    → Step 1: Check DB for existing summary (skip if found)
-    → Step 2: Fetch story details from Algolia
-    → Step 3: Fetch & flatten comments (max 200, depth 3)
-    → Step 4: Send to OpenRouter LLM → Structured JSON response
-    → Step 5: Upsert summary to PostgreSQL
-  → UI polls GET /api/stories/[id]/summarize every 2s
-  → Summary displayed in AISummaryCard component
-```
-
-### 3. Bookmarking (Optimistic Write)
-```
-User clicks bookmark icon → BookmarkContext (optimistic Set update)
-  → Server Action: toggleBookmark()
-    → Prisma: Check existing → Create or Delete
-    → Revalidate paths: /, /bookmarks, /story/[id]
-  → On error: Rollback optimistic state
+┌─────────────────────────────────────────────────────────────┐
+│                  summarize-discussion                        │
+│                                                              │
+│  ① IDEMPOTENCY CHECK                                        │
+│     └─► Query DB for storyId → return cached if found       │
+│                                                              │
+│  ② CONTEXT ASSEMBLY                                         │
+│     └─► Algolia: fetch story + full comment tree            │
+│     └─► Flatten nested comments (max depth: 3)              │
+│     └─► Truncate to top 200 comments (95% of signal)        │
+│                                                              │
+│  ③ SANITIZATION                                             │
+│     └─► Handle orphan stories (0 comments)                  │
+│     └─► Generate graceful "No discussion yet" notice        │
+│                                                              │
+│  ④ LLM ORCHESTRATION                                        │
+│     └─► System prompt: Elite Analyst persona                │
+│     └─► User prompt: formatted story + flattened comments   │
+│     └─► OpenRouter (nvidia/nemotron-3-nano)                 │
+│     └─► Structured JSON: { overview, keyPoints[], sentiment }│
+│                                                              │
+│  ⑤ PERSISTENCE                                             │
+│     └─► Upsert Summary into PostgreSQL                      │
+│     └─► UI polling resolves → AISummaryCard renders         │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-- [Docker](https://www.docker.com/products/docker-desktop/) (v20+)
-- [Docker Compose](https://docs.docker.com/compose/) (included with Docker Desktop)
 
-### Option 1: Docker (Recommended for Evaluation)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) v20+
+- [Docker Compose](https://docs.docker.com/compose/) (included with Docker Desktop)
+- An [OpenRouter API Key](https://openrouter.ai/keys) (free tier is sufficient)
+
+---
+
+### 🐳 Option 1: Docker (Recommended)
+
+The fastest way to run the full stack — app, database, and Inngest — in one command.
 
 ```bash
 # 1. Clone the repository
 git clone <repo-url>
 cd dev-monks
 
-# 2. Set up environment variables
+# 2. Configure environment variables
 cp .env.example .env
-# Edit .env and add your OPENROUTER_API_KEY (get one free at https://openrouter.ai/keys)
+# Open .env and set OPENROUTER_API_KEY
 
 # 3. Start all services
 docker compose up --build
 
-# 4. Open the app
-# App:     http://localhost:3000
-# Inngest: http://localhost:8288
+# 4. Visit the app
+open http://localhost:3000
+
+# 5. (Optional) Inngest job dashboard
+open http://localhost:8288
 ```
 
-> **Note:** The AI summarization feature requires a valid `OPENROUTER_API_KEY`. The rest of the app (browsing, search, bookmarks) works without it.
+> **Note:** Story browsing, search, and bookmarks work **without** an `OPENROUTER_API_KEY`. Only the AI summarization feature requires it.
 
-### Option 2: Local Development
+---
+
+### 💻 Option 2: Local Development
+
+For faster iteration without Docker.
 
 ```bash
 # 1. Install dependencies
@@ -160,122 +367,170 @@ npm install
 
 # 2. Set up environment variables
 cp .env.example .env
-# Edit .env with your PostgreSQL URL and OpenRouter key
+# Set DATABASE_URL (your local Postgres) and OPENROUTER_API_KEY
 
-# 3. Generate Prisma client and run migrations
+# 3. Set up the database
 npx prisma generate
 npx prisma migrate deploy
 
-# 4. Start the development server
+# 4. Start the Next.js dev server
 npm run dev
 
-# 5. (Optional) Start Inngest dev server for AI summarization
+# 5. (Optional) Start the Inngest dev server for AI background jobs
 npx inngest-cli@latest dev -u http://localhost:3000/api/inngest
 ```
 
 ---
 
-## Approach & Design Decisions
+### 🔑 Environment Variables
 
-### Why Algolia HN API instead of Official Firebase API?
-The official HN API requires **one HTTP request per item** — fetching a story with 500 comments would need 500+ sequential requests. Algolia's API returns the **entire comment tree in a single request**, making it 10-20x faster and far more suitable for AI summarization (where we need all comments at once).
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `OPENROUTER_API_KEY` | ⚠️ AI only | Your OpenRouter API key (free at openrouter.ai) |
+| `INNGEST_EVENT_KEY` | Docker only | Set automatically by Docker Compose |
+| `INNGEST_SIGNING_KEY` | Docker only | Set automatically by Docker Compose |
+
+---
+
+## 🧠 Approach & Design Decisions
+
+### Why Algolia HN API Instead of the Official Firebase API?
+
+The official HN Firebase API requires **one HTTP request per item**. A story with 500 comments requires 500+ sequential roundtrips — at ~50ms each, that's 25+ seconds of latency.
+
+Algolia's Search API returns the **entire comment tree in a single request**, making it:
+- **10–20× faster** for page loads
+- **Essential** for AI summarization (we need all comments at once to pass to the LLM)
+- The only viable approach for a smooth UX
+
+The minor tradeoff is a slight indexing delay vs. real-time Firebase data.
+
+---
 
 ### Why Inngest for Background Jobs?
-AI summarization is a **multi-step, potentially slow process** (fetch → process → LLM call → save). Inngest provides:
-- **Durable execution** — Each step is checkpointed; if Step 4 (AI call) fails, it retries from Step 4 only
-- **Automatic retries** — Built-in retry logic with backoff
-- **Observability** — Visual dashboard at `:8288` shows every function run, step execution, and errors
-- **No infrastructure** — No need to manage Redis, Bull queues, or worker processes
 
-### Why OpenRouter with a free model?
-OpenRouter provides access to multiple LLMs through a single API. The `nvidia/nemotron-3-nano` model is:
-- **Free tier** — No cost for evaluation/demo purposes
-- **JSON mode** — Supports structured output (`response_format: { type: "json_object" }`)
-- **Good enough** — Produces meaningful summaries of technical discussions
+LLM calls are **slow, failure-prone, and expensive to re-run**. A naive implementation inside a Next.js API route would:
+- Time out on Vercel (60s limit)
+- Lose progress on any network failure
+- Re-run expensive LLM calls on retries
 
-### Why Anonymous Users (Cookie-based)?
-For a Hacker News reader, requiring sign-up creates unnecessary friction. Cookie-based anonymous IDs allow:
-- **Zero-friction bookmarking** — Works immediately, no auth flow
-- **Per-user isolation** — Each browser gets unique bookmarks
-- **Easy upgrade path** — Could link cookie IDs to real accounts later
+Inngest provides step-based checkpointing: if Step 4 (LLM call) succeeds but Step 5 (DB write) fails, only Step 5 is retried — not the LLM call. This makes the pipeline both reliable and cost-efficient.
+
+---
+
+### Why OpenRouter with `nvidia/nemotron-3-nano`?
+
+- **Free tier** — no cost for experimentation and evaluation
+- **JSON mode** — structured output prevents UI breakage
+- **OpenRouter abstraction** — trivial to swap to Claude 3.5, GPT-4o, or Gemini via a one-line model ID change
+- **Sufficient quality** for technical comment summarization
+
+---
+
+### Why Anonymous Cookie-Based Auth?
+
+OAuth adds signup friction that kills conversion for "save for later" features. Cookie-based anonymous IDs give users:
+- **Instant bookmarks** on first visit with zero sign-up
+- **Session-persistent** saves tied to their browser
+- A **clear migration path** — replace the cookie ID with an authenticated user ID when adding NextAuth
+
+---
 
 ### Why Prisma with `@prisma/adapter-pg`?
-Prisma 7 with the `pg` adapter provides:
-- **Type-safe queries** — Full TypeScript autocompletion for all DB operations
-- **Connection pooling** — Built-in `pg.Pool` with configurable limits
-- **Migration system** — Schema changes tracked in version control
-- **Conditional SSL** — Same code works with both cloud (Neon) and local (Docker) Postgres
+
+- **Type-safe queries** with full TypeScript inference
+- **Migration system** that works identically in Docker, local Postgres, and cloud providers (Neon, Railway, Supabase)
+- **Connection pooling** via `pg` adapter, avoiding Serverless cold-start connection exhaustion
 
 ---
 
-## Tradeoffs
+## ⚖️ Tradeoffs
 
-| Decision | Benefit | Cost |
+| Decision | ✅ Benefit | ⚠️ Cost |
 |---|---|---|
-| **Algolia API over Firebase** | 10-20x faster comment fetching, single request for all data | Slight delay in indexing (few minutes behind real-time) |
-| **Free AI model** | Zero cost, easy evaluation | Lower quality summaries vs GPT-4/Claude; possible rate limits |
-| **Cookie-based auth** | Frictionless UX, no sign-up required | Bookmarks lost on cookie clear; no cross-device sync |
-| **Server Components for story pages** | Better SEO, faster initial load, direct DB access | Cannot use client-side interactivity without `"use client"` boundary |
-| **Inngest over simple async/await** | Durability, retries, observability dashboard | Adds a service dependency; more complex Docker setup |
-| **`standalone` output mode** | Smaller Docker image, faster cold starts | Requires careful file copying in Dockerfile |
-| **Single PostgreSQL for bookmarks + summaries** | Simple infrastructure, ACID guarantees | Would need read replicas or caching at scale |
-| **Optimistic UI for bookmarks** | Instant visual feedback | Requires rollback logic on server errors |
+| **Algolia API over Firebase** | 10–20× faster story + comment fetching | Slight indexing delay vs. real-time Firebase |
+| **Free LLM (nemotron-3-nano)** | Zero AI cost for evaluation | Lower quality vs. GPT-4o or Claude 3.5; rate limits under load |
+| **Cookie-based anonymous auth** | Zero-friction bookmarking; no sign-up required | No cross-device sync; easy to lose on cookie clear |
+| **Next.js Server Components** | Great SEO, faster initial page load, no client JS bloat | Requires careful `"use client"` boundary management for interactivity |
+| **Inngest for background jobs** | Durable retries, observability, step checkpointing | Additional service dependency; adds Docker Compose complexity |
+| **Optimistic UI for bookmarks** | Instant visual feedback even before DB write | Requires rollback logic and error handling |
+| **Snapshot pattern for bookmarks** | Stable bookmarks even if HN story is deleted/flagged | Slightly stale data if a story's score/title changes significantly |
+| **Shared AI summaries** | Cost-efficient; instant for subsequent users | Summary is computed once — doesn't update as the discussion grows |
 
 ---
 
-## Future Improvements
+## 🔮 Future Improvements
 
-If I had more time, I would add:
-
-- **Authentication** — Integrate NextAuth.js with GitHub/Google OAuth for persistent user profiles
-- **Real-time updates** — WebSocket or SSE for live comment/score updates
-- **Caching layer** — Redis for frequently accessed stories and summaries
-- **Better AI model** — Upgrade to GPT-4o or Claude for higher-quality summaries with longer context
-- **Summary history** — Track summary versions over time as discussions evolve
-- **Rate limiting** — API rate limiting per user to prevent abuse
-- **Search improvements** — Full-text search across bookmarks and summaries
-- **Dark mode toggle** — User-selectable theme preference (currently fixed)
-- **Responsive polish** — Tablet-specific layouts and PWA support
-- **Testing** — Unit tests for API routes, integration tests for Inngest functions, E2E with Playwright
-- **CI/CD pipeline** — GitHub Actions for lint, test, build, and Docker image push
-- **Monitoring** — Error tracking (Sentry), performance monitoring, structured logging
+- 🔐 **Authentication** — Add NextAuth.js for cross-device bookmark syncing and user accounts
+- ⚡ **Real-time Updates** — WebSocket or SSE for live score and comment count updates
+- 🚀 **Redis Caching** — Cache hot summaries and story feeds to reduce DB + Algolia load
+- 🧠 **Better AI Models** — One-line swap to Claude 3.5 Sonnet or GPT-4o via OpenRouter
+- 🔍 **Full-Text Search** — Search across bookmarks and AI-generated summaries
+- 🌙 **Dark Mode** — User-selectable theme with `next-themes`
+- 🧪 **Testing** — E2E tests with Playwright and Inngest failure simulation
+- 📊 **Analytics** — Track which stories get summarized most, summary quality feedback
+- 🔔 **Notifications** — Alert users when a summary is ready (email or browser push)
+- 📤 **Export** — Export bookmarks and summaries to Markdown, Notion, or Obsidian
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 dev-monks/
-├── docker-compose.yml          # Multi-service orchestration
-├── Dockerfile                  # Multi-stage production build
+│
+├── 🐳 docker-compose.yml          # Multi-service orchestration (app + postgres + inngest)
+├── 🐳 Dockerfile                  # Multi-stage production build
+│
 ├── prisma/
-│   ├── schema.prisma           # Database schema (Bookmark, Summary)
-│   └── migrations/             # Version-controlled schema migrations
+│   ├── schema.prisma              # DB schema — Bookmark & Summary models
+│   └── migrations/                # Version-controlled migration history
+│
 ├── scripts/
-│   └── docker-entrypoint.sh    # DB readiness check + auto-migration
-├── src/
-│   ├── app/
-│   │   ├── page.tsx            # Home feed (infinite scroll)
-│   │   ├── story/[id]/         # Story detail + comments
-│   │   ├── bookmarks/          # Saved stories page
-│   │   ├── actions/            # Server actions (bookmark toggle)
-│   │   └── api/
-│   │       ├── stories/        # Story & search API routes
-│   │       └── inngest/        # Inngest webhook endpoint
-│   ├── components/
-│   │   ├── hn/                 # Domain components (PostCard, Comment, SummarizeButton)
-│   │   ├── layout/             # Layout components (Navbar, Hero, Footer)
-│   │   └── ui/                 # Reusable UI (Skeletons, ErrorAlert, Icons)
-│   ├── context/                # React Context (BookmarkProvider)
-│   ├── cookies/                # Auth utilities (anonymous user ID)
-│   ├── hooks/                  # Custom hooks (useStories)
-│   ├── inngest/                # Background functions (summarize-discussion)
-│   ├── lib/                    # Core libraries (hn-api, ai-service, prisma)
-│   ├── types/                  # TypeScript type definitions
-│   └── utils/                  # Utility functions (date, text, HTML cleaning)
-└── .env.example                # Environment variable template
+│   └── docker-entrypoint.sh       # DB readiness check + auto-migration on startup
+│
+└── src/
+    ├── app/
+    │   ├── page.tsx               # 🏠 Home feed — infinite scroll story listing
+    │   ├── story/[id]/            # 📄 Story detail — full comment tree + AI summary
+    │   ├── bookmarks/             # 🔖 Saved stories page
+    │   ├── actions/
+    │   │   └── bookmarks.ts       # ⚡ Server Actions — toggle, list, check bookmarks
+    │   └── api/
+    │       ├── stories/           # 📡 REST endpoints — feed, featured, summarize
+    │       └── inngest/           # 🔁 Inngest webhook receiver
+    │
+    ├── components/
+    │   ├── hn/                    # 🧩 Domain components (PostCard, Comment, SummarizeButton, AISummaryCard)
+    │   ├── layout/                # 🎨 Layout (Navbar, Hero, Footer)
+    │   └── ui/                    # 🔧 Reusable UI (Skeletons, ErrorAlert, Icons)
+    │
+    ├── context/
+    │   └── BookmarkContext.tsx    # 🗃️ Global bookmark state with optimistic updates
+    │
+    ├── cookies/                   # 🍪 Anonymous user ID generation & retrieval
+    ├── hooks/
+    │   └── useStories.ts          # 🪝 React Query hook — infinite paginated story feed
+    │
+    ├── inngest/
+    │   └── summarize-discussion.ts # 🤖 5-step durable AI summarization function
+    │
+    ├── lib/
+    │   ├── hn-api.ts              # 🌐 Algolia HN API client
+    │   ├── ai-service.ts          # 🧠 OpenRouter LLM integration
+    │   └── prisma.ts              # 🗄️ Prisma client singleton
+    │
+    ├── types/                     # 📐 TypeScript type definitions
+    └── utils/                     # 🛠️ Helpers — date formatting, text truncation, HTML sanitization
 ```
 
 ---
 
+<div align="center">
+
 **Built with ❤️ by Dev Monks**
+
+*If this project helped you, please consider giving it a ⭐ on GitHub!*
+
+</div>
