@@ -3,9 +3,3 @@ export interface SummaryData {
   keyPoints: string[];
   sentiment: string;
 }
-
-export interface AIResult {
-  summary: string;
-  keyPoints: string[];
-  sentiment: string;
-}

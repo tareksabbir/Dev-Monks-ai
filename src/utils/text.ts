@@ -1,9 +1,19 @@
 /**
- * Remove HTML tags from a string and decode basic entities if needed
+ * Remove HTML tags from a string and decode common HTML entities
  */
 export function cleanHtml(html: string): string {
   if (!html) return "";
-  return html.replace(/<[^>]*>/g, "").trim();
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#x2F;/g, "/")
+    .replace(/&nbsp;/g, " ")
+    .trim();
 }
 
 /**

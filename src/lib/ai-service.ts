@@ -1,4 +1,4 @@
-import { AIResult } from "@/types";
+import { SummaryData } from "@/types";
 
 const SYSTEM_PROMPT = `You are an elite Hacker News analyst. Your mission is to extract the maximum "signal" from technical discussions while avoiding any speculation or hallucination.
 
@@ -24,12 +24,17 @@ Return ONLY valid JSON. No markdown fences. No extra text.
   "sentiment": "positive | negative | mixed | neutral"
 }`;
 
+const AI_TIMEOUT_MS = 30000; // 30 seconds
+
 export async function generateSummary(
   title: string,
   comments: string,
   totalComments: number
-): Promise<AIResult> {
+): Promise<SummaryData> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -38,7 +43,7 @@ export async function generateSummary(
         "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
       },
       body: JSON.stringify({
-        model: "nvidia/nemotron-3-nano-30b-a3b:free",
+        model: process.env.AI_MODEL || "nvidia/nemotron-3-nano-30b-a3b:free",
         temperature: 0.1,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
@@ -49,7 +54,10 @@ export async function generateSummary(
         ],
         response_format: { type: "json_object" },
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`OpenRouter API error: ${response.status}`);
@@ -57,7 +65,7 @@ export async function generateSummary(
 
     const data = await response.json();
     const content = data.choices[0].message.content;
-    const result = JSON.parse(content) as AIResult;
+    const result = JSON.parse(content) as SummaryData;
 
     return {
       summary: result.summary,

@@ -1,5 +1,6 @@
 import { getStoriesByType } from "@/lib/hn-api";
 import { AlgoliaHit } from "@/types";
+import { mapAlgoliaHits } from "@/utils";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -56,24 +57,3 @@ export async function GET(req: NextRequest) {
   }
 }
 
-function mapAlgoliaHits(hits: AlgoliaHit[]) {
-  return hits
-    .filter((hit) => hit.title)
-    .map((hit) => ({
-      id: Number(hit.objectID),
-      by: hit.author || "unknown",
-      time: hit.created_at_i,
-      title: hit.title,
-      text: hit.story_text || "",
-      url: hit.url || "",
-      score: hit.points || 0,
-      descendants: hit.num_comments || 0,
-      type: hit._tags?.includes("ask_hn")
-        ? "ask"
-        : hit._tags?.includes("show_hn")
-          ? "show"
-          : hit._tags?.includes("job")
-            ? "job"
-            : "story",
-    }));
-}

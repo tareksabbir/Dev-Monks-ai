@@ -1,5 +1,28 @@
-import { AlgoliaComment } from "@/types";
+import { AlgoliaComment, AlgoliaHit, HNItem } from "@/types";
 import { cleanHtml } from "./text";
+
+/** Shared mapper: Algolia search hits → HNItem[] (used by both hn-api and API routes) */
+export function mapAlgoliaHits(hits: AlgoliaHit[]): HNItem[] {
+  return hits
+    .filter((hit) => hit.title)
+    .map((hit) => ({
+      id: Number(hit.objectID),
+      by: hit.author || "unknown",
+      time: hit.created_at_i,
+      title: hit.title,
+      text: hit.story_text || "",
+      url: hit.url || "",
+      score: hit.points || 0,
+      descendants: hit.num_comments || 0,
+      type: hit._tags?.includes("ask_hn")
+        ? "ask"
+        : hit._tags?.includes("show_hn")
+          ? "show"
+          : hit._tags?.includes("job")
+            ? "job"
+            : "story",
+    })) as HNItem[];
+}
 
 export const ALGOLIA_BASE = "https://hn.algolia.com/api/v1";
 

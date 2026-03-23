@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkles, Loader2, RefreshCw, ChevronDown, ChevronUp, Brain, CheckCircle2, Trash2, AlertTriangle } from "lucide-react";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
 import { SummaryData } from "@/types";
@@ -13,66 +14,59 @@ interface SummarizeButtonProps {
 }
 
 export default function SummarizeButton({ storyId, initialSummary }: SummarizeButtonProps) {
-  const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState<SummaryData | null>(initialSummary || null);
   const [expanded, setExpanded] = useState(!!initialSummary);
-  const [error, setError] = useState<string | null>(null);
-  // Poll for summary completion
-  const pollForSummary = useCallback(async () => {
-    const maxAttempts = 30; // 30 * 2s = 60s max wait
-    let attempts = 0;
+  const [isPolling, setIsPolling] = useState(false);
+  const queryClient = useQueryClient();
 
-    const poll = async (): Promise<void> => {
-      if (attempts >= maxAttempts) {
-        setError("Summary is taking longer than expected. Please try again later.");
-        setLoading(false);
-        return;
+  // ──────────────────────────────────────────────
+  // GET: Poll for summary status (TanStack Query)
+  // ──────────────────────────────────────────────
+  const {
+    data: polledSummary,
+    error: pollError,
+  } = useQuery({
+    queryKey: ["summary", storyId],
+    queryFn: async (): Promise<SummaryData | null> => {
+      const res = await fetch(`/api/stories/${storyId}/summarize`);
+      const data = await res.json();
+
+      if (data.status === "completed" && data.summary) {
+        const keyPoints = Array.isArray(data.summary.keyPoints)
+          ? data.summary.keyPoints
+          : JSON.parse(data.summary.keyPoints || "[]");
+
+        setIsPolling(false);
+        setExpanded(true);
+
+        return {
+          summary: data.summary.summary,
+          keyPoints,
+          sentiment: data.summary.sentiment,
+        };
       }
 
-      try {
-        const res = await fetch(`/api/stories/${storyId}/summarize`);
-        const data = await res.json();
+      // Still processing — return null to keep polling
+      return null;
+    },
+    enabled: isPolling,
+    refetchInterval: isPolling ? 2000 : false,
+    staleTime: 0,
+    gcTime: 0,
+  });
 
-        if (data.status === "completed" && data.summary) {
-          const keyPoints = Array.isArray(data.summary.keyPoints)
-            ? data.summary.keyPoints
-            : JSON.parse(data.summary.keyPoints || "[]");
+  // Current summary: polled result → initial prop
+  const summary = polledSummary || initialSummary || null;
 
-          setSummary({
-            summary: data.summary.summary,
-            keyPoints,
-            sentiment: data.summary.sentiment,
-          });
-          setExpanded(true);
-          setLoading(false);
-          return;
-        }
-
-        // Still processing — poll again
-        attempts++;
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        return poll();
-      } catch {
-        attempts++;
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        return poll();
-      }
-    };
-
-    return poll();
-  }, [storyId]);
-
-  const handleSummarize = async (force = false) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // If force is true, delete the old summary first as per user request
+  // ──────────────────────────────────────────────
+  // POST: Trigger summarization (useMutation)
+  // ──────────────────────────────────────────────
+  const summarizeMutation = useMutation({
+    mutationFn: async (force: boolean) => {
+      // If force, delete old summary first
       if (force) {
         await fetch(`/api/stories/${storyId}/summarize`, {
           method: "DELETE",
         });
-        setSummary(null); // Clear local state to show the animation
       }
 
       const res = await fetch(`/api/stories/${storyId}/summarize`, {
@@ -87,48 +81,58 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
         throw new Error(data.message || data.error || "Failed to start summarization");
       }
 
-      // If summary already exists and was returned immediately (should only happen if force=false)
+      return data;
+    },
+    onSuccess: (data) => {
+      // If summary already exists and returned immediately
       if (data.status === "completed" && data.summary) {
         const keyPoints = Array.isArray(data.summary.keyPoints)
           ? data.summary.keyPoints
           : JSON.parse(data.summary.keyPoints || "[]");
 
-        setSummary({
+        queryClient.setQueryData(["summary", storyId], {
           summary: data.summary.summary,
           keyPoints,
           sentiment: data.summary.sentiment,
         });
         setExpanded(true);
-        setLoading(false);
-        return;
+      } else {
+        // Summary is being generated — start polling
+        setIsPolling(true);
       }
+    },
+  });
 
-      // Summary is being generated — start polling
-      await pollForSummary();
-    } catch (err: any) {
-      console.error("AI summarization failed:", err);
-      setError(err.message || "Failed to start summarization. Please try again.");
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to remove this summary?")) return;
-    
-    setLoading(true);
-    try {
+  // ──────────────────────────────────────────────
+  // DELETE: Remove summary (useMutation)
+  // ──────────────────────────────────────────────
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
       await fetch(`/api/stories/${storyId}/summarize`, {
         method: "DELETE",
       });
-      setSummary(null);
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(["summary", storyId], null);
       setExpanded(false);
-    } catch (err) {
-      console.error("Failed to delete summary:", err);
-      setError("Failed to remove summary. Please try again.");
-    } finally {
-      setLoading(false);
+    },
+  });
+
+  const handleSummarize = (force = false) => {
+    if (force) {
+      // Clear cached summary immediately for UI feedback
+      queryClient.setQueryData(["summary", storyId], null);
     }
+    summarizeMutation.mutate(force);
   };
+
+  const handleDelete = () => {
+    if (!confirm("Are you sure you want to remove this summary?")) return;
+    deleteMutation.mutate();
+  };
+
+  const loading = summarizeMutation.isPending || isPolling;
+  const error = summarizeMutation.error?.message || deleteMutation.error?.message || (pollError ? "Polling failed. Please try again." : null);
 
   // Premium AI Generation Animation
   if (loading && !summary) {
@@ -216,7 +220,7 @@ export default function SummarizeButton({ storyId, initialSummary }: SummarizeBu
 
                 <button
                   onClick={handleDelete}
-                  disabled={loading}
+                  disabled={loading || deleteMutation.isPending}
                   className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-foreground/40 hover:text-red-600 transition-colors"
                 >
                   <Trash2 size={14} />

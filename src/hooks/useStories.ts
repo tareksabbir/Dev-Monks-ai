@@ -12,6 +12,7 @@ export function useStories(
       const res = await fetch(
         `/api/stories?type=${type}&page=${pageParam}&query=${encodeURIComponent(query)}`,
       );
+      if (!res.ok) throw new Error(`Failed to fetch stories (${res.status})`);
       return res.json() as Promise<HNItem[]>;
     },
     initialPageParam: 0,
@@ -30,6 +31,7 @@ export function useFeaturedStory() {
     queryKey: ["featured-story"],
     queryFn: async () => {
       const res = await fetch("/api/stories/featured");
+      if (!res.ok) throw new Error(`Failed to fetch featured story (${res.status})`);
       return res.json();
     },
     staleTime: 1000 * 60 * 5, // 5 minutes cache

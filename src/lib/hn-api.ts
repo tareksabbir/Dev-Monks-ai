@@ -10,6 +10,7 @@ import {
   ALGOLIA_BASE,
   countDescendants,
   collectAndScoreComments,
+  mapAlgoliaHits,
 } from "@/utils";
 
 // Algolia HN API এর মাধ্যমে একবারে সব কমেন্টসহ স্টোরি ফেচ করা
@@ -24,8 +25,14 @@ export async function getItemWithComments(
     ]);
 
     if (!itemRes.ok) return null;
-
     const data: AlgoliaItem = await itemRes.json();
+
+    // Basic validation: ensure data has an id and type
+    if (!data || typeof data.id !== "number") {
+      console.warn(`Algolia response for item ${id} is invalid:`, data);
+      return null;
+    }
+
     const searchData = searchRes.ok ? await searchRes.json() : null;
     const searchHit = searchData?.hits?.[0];
 
@@ -109,24 +116,12 @@ export async function getStoriesByType(
     }
 
     const data: { hits: AlgoliaHit[] } = await res.json();
+    if (!data || !Array.isArray(data.hits)) {
+      console.error(`Invalid Algolia response structure for ${url}:`, data);
+      return [];
+    }
 
-    return data.hits.map((hit) => ({
-      id: Number(hit.objectID),
-      by: hit.author || "unknown",
-      time: hit.created_at_i,
-      title: hit.title,
-      text: hit.story_text || "",
-      url: hit.url || "",
-      score: hit.points || 0,
-      descendants: hit.num_comments || 0,
-      type: hit._tags?.includes("ask_hn")
-        ? "ask"
-        : hit._tags?.includes("show_hn")
-          ? "show"
-          : hit._tags?.includes("job")
-            ? "job"
-            : "story",
-    }));
+    return mapAlgoliaHits(data.hits);
   } catch (error) {
     console.error(`Unexpected error in getStoriesByType (${type}):`, error);
     return [];

@@ -1,7 +1,8 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getBookmarkIds,
   toggleBookmark as toggleAction,
@@ -20,44 +21,64 @@ const BookmarkContext = createContext<BookmarkContextType | undefined>(
 );
 
 export function BookmarkProvider({ children }: { children: React.ReactNode }) {
-  const [bookmarkIds, setBookmarkIds] = useState<Set<number>>(new Set());
+  const queryClient = useQueryClient();
 
-  const refreshBookmarks = async () => {
-    try {
-      const ids = await getBookmarkIds();
-      setBookmarkIds(new Set(ids));
-    } catch (error) {
-      console.error("Failed to fetch bookmark IDs:", error);
-    }
-  };
+  const { data: bookmarkIdsArray = [], refetch } = useQuery({
+    queryKey: ["bookmarks", "ids"],
+    queryFn: () => getBookmarkIds(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
-  useEffect(() => {
-    refreshBookmarks();
-  }, []);
+  const bookmarkIds = useMemo(
+    () => new Set(bookmarkIdsArray),
+    [bookmarkIdsArray],
+  );
+
+  const mutation = useMutation({
+    mutationFn: (item: HNItem) => toggleAction(item),
+    onMutate: async (item) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ["bookmarks", "ids"] });
+
+      // Snapshot the previous value
+      const previousIds =
+        queryClient.getQueryData<number[]>(["bookmarks", "ids"]) || [];
+
+      // Optimistically update to the new value
+      const id = Number(item.id);
+      const isCurrentlyBookmarked = previousIds.includes(id);
+      const newIds = isCurrentlyBookmarked
+        ? previousIds.filter((bid) => bid !== id)
+        : [...previousIds, id];
+
+      queryClient.setQueryData(["bookmarks", "ids"], newIds);
+
+      // Return a context object with the snapshotted value
+      return { previousIds };
+    },
+    onError: (err, item, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context) {
+        queryClient.setQueryData(["bookmarks", "ids"], context.previousIds);
+      }
+      console.error("Failed to toggle bookmark:", err);
+    },
+    onSettled: () => {
+      // Always refetch after error or success to keep server state in sync
+      queryClient.invalidateQueries({ queryKey: ["bookmarks", "ids"] });
+      // Also invalidate bookmarks list if you have one
+      queryClient.invalidateQueries({ queryKey: ["bookmarks", "list"] });
+    },
+  });
 
   const isBookmarked = (id: number) => bookmarkIds.has(Number(id));
 
   const toggleBookmark = async (item: HNItem) => {
-    const id = Number(item.id);
-    const isCurrentlyBookmarked = bookmarkIds.has(id);
+    mutation.mutate(item);
+  };
 
-    // Optimistic update
-    const newIds = new Set(bookmarkIds);
-    if (isCurrentlyBookmarked) {
-      newIds.delete(id);
-    } else {
-      newIds.add(id);
-    }
-    setBookmarkIds(newIds);
-
-    try {
-      await toggleAction(item);
-    } catch (error) {
-      // Rollback on error
-      const rollbackIds = new Set(bookmarkIds);
-      setBookmarkIds(rollbackIds);
-      console.error("Failed to toggle bookmark:", error);
-    }
+  const refreshBookmarks = async () => {
+    await refetch();
   };
 
   return (

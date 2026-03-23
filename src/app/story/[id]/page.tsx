@@ -10,7 +10,7 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { getStorySummary } from "@/lib/story-service";
 import SummarizeButton from "@/components/hn/SummarizeButton";
 import { timeAgo } from "@/utils";
 import { notFound } from "next/navigation";
@@ -37,10 +37,8 @@ export default async function StoryPage({
     },
   );
 
-  // AI Summary চেক করা
-  const existingSummary = await prisma.summary.findUnique({
-    where: { storyId: Number(id) },
-  });
+  // AI Summary চেক করা (using service)
+  const existingSummary = await getStorySummary(Number(id));
 
   return (
     <>
@@ -125,15 +123,7 @@ export default async function StoryPage({
           <div className="mb-16">
             <SummarizeButton
               storyId={Number(id)}
-              initialSummary={
-                existingSummary
-                  ? {
-                      summary: existingSummary.summary,
-                      keyPoints: JSON.parse(existingSummary.keyPoints),
-                      sentiment: existingSummary.sentiment,
-                    }
-                  : null
-              }
+              initialSummary={existingSummary}
             />
           </div>
         ) : null}
