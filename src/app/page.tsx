@@ -14,28 +14,9 @@ import { HNItem } from "@/types";
 import { useMemo, useCallback } from "react";
 import { Search, RotateCcw } from "lucide-react";
 import { ErrorAlert } from "@/components/ui/ErrorAlert";
+import { getHNType } from "@/utils/hn";
 
-// Mapping categories to HN types - outside component for stable reference
-const getHNType = (
-  category: string,
-): "top" | "new" | "best" | "ask" | "show" | "job" | "all" => {
-  switch (category) {
-    case "All":
-      return "all";
-    case "New":
-      return "new";
-    case "Best":
-      return "best";
-    case "Ask HN":
-      return "ask";
-    case "Show HN":
-      return "show";
-    case "Jobs":
-      return "job";
-    default:
-      return "top";
-  }
-};
+
 
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -59,7 +40,7 @@ export default function BlogPage() {
   }, []);
 
   return (
-    <main className="flex-1 flex flex-col w-full">
+    <div className="flex-1 flex flex-col w-full">
       <Hero />
       <div className="w-full flex-col flex items-center pb-8">
         {isFeaturedLoading && !featured ? (
@@ -177,6 +158,6 @@ export default function BlogPage() {
       <div className="w-full border-t border-card-border mt-8">
         <FooterCTA />
       </div>
-    </main>
+    </div>
   );
 }

@@ -5,14 +5,20 @@ import pg from "pg";
 
 const connectionString = `${process.env.DATABASE_URL}`;
 
+// Enable SSL only when the connection string requires it (e.g., Neon, Supabase)
+// Local Docker Postgres does not use SSL
+const useSSL = connectionString.includes("sslmode=require");
+
 const pool = new pg.Pool({
   connectionString,
-  ssl: {
-    rejectUnauthorized: false, // Required for some hosted PostgreSQL providers like Neon
-  },
-  max: 20, // Adjust pool size as needed
+  ...(useSSL && {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  }),
+  max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000, // Important for hibernation wake-up
+  connectionTimeoutMillis: 10000,
 });
 
 const adapter = new PrismaPg(pool as any);

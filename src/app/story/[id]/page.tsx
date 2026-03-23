@@ -44,7 +44,7 @@ export default async function StoryPage({
 
   return (
     <>
-      <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-12">
+      <div className="flex-1 w-full max-w-5xl mx-auto px-6 py-12">
         {/* Back Button */}
         <Link
           href="/"
@@ -123,13 +123,17 @@ export default async function StoryPage({
         {/* AI Summary Section */}
         {story.descendants && story.descendants > 0 ? (
           <div className="mb-16">
-            <SummarizeButton 
-              storyId={Number(id)} 
-              initialSummary={existingSummary ? {
-                summary: existingSummary.summary,
-                keyPoints: JSON.parse(existingSummary.keyPoints),
-                sentiment: existingSummary.sentiment
-              } : null}
+            <SummarizeButton
+              storyId={Number(id)}
+              initialSummary={
+                existingSummary
+                  ? {
+                      summary: existingSummary.summary,
+                      keyPoints: JSON.parse(existingSummary.keyPoints),
+                      sentiment: existingSummary.sentiment,
+                    }
+                  : null
+              }
             />
           </div>
         ) : null}
@@ -146,7 +150,7 @@ export default async function StoryPage({
             <CommentTree comments={comments} />
           </div>
         </section>
-      </main>
+      </div>
     </>
   );
 }

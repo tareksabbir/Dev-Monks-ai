@@ -1,28 +1,46 @@
-import { HNItem, HNComment, AlgoliaItem, AlgoliaComment, AlgoliaHit } from "@/types";
+import {
+  HNItem,
+  HNComment,
+  AlgoliaItem,
+  AlgoliaComment,
+  AlgoliaHit,
+} from "@/types";
 
-import { cleanHtml } from "@/utils";
-
-const ALGOLIA_BASE = "https://hn.algolia.com/api/v1";
+import {
+  ALGOLIA_BASE,
+  countDescendants,
+  collectAndScoreComments,
+} from "@/utils";
 
 // Algolia HN API এর মাধ্যমে একবারে সব কমেন্টসহ স্টোরি ফেচ করা
-export async function getItemWithComments(id: number): Promise<{ story: HNItem; comments: HNComment[] } | null> {
+export async function getItemWithComments(
+  id: number,
+): Promise<{ story: HNItem; comments: HNComment[] } | null> {
   try {
-    const response = await fetch(`${ALGOLIA_BASE}/items/${id}`);
-    if (!response.ok) return null;
+    // Parallel fetch: Item tree + Search metadata (for consistent counts/scores)
+    const [itemRes, searchRes] = await Promise.all([
+      fetch(`${ALGOLIA_BASE}/items/${id}`),
+      fetch(`${ALGOLIA_BASE}/search?tags=story,story_${id}`)
+    ]);
 
-    const data: AlgoliaItem = await response.json();
-    
+    if (!itemRes.ok) return null;
+
+    const data: AlgoliaItem = await itemRes.json();
+    const searchData = searchRes.ok ? await searchRes.json() : null;
+    const searchHit = searchData?.hits?.[0];
+
     const story: HNItem = {
       id: data.id,
-      type: data.type as HNItem["type"],
-      by: data.author || "unknown",
-      time: data.created_at_i,
-      title: data.title,
+      type: (searchHit?.type as HNItem["type"]) || (data.type as HNItem["type"]),
+      by: searchHit?.author || data.author || "unknown",
+      time: searchHit?.created_at_i || data.created_at_i,
+      title: searchHit?.title || data.title,
       text: data.text || "",
-      url: data.url || "",
-      score: data.points || 0,
-      descendants: data.children?.length || 0, // Top-level kids count for descendants or recursive?
-      kids: data.children?.map((c) => c.id) || []
+      url: searchHit?.url || data.url || "",
+      score: searchHit?.points ?? data.points ?? 0,
+      // Search API-র num_comments ব্যবহার করো যদি পাওয়া যায়, নাহলে ম্যানুয়ালি গুনো
+      descendants: searchHit?.num_comments ?? (data.children ? data.children.reduce((sum, c) => sum + 1 + countDescendants(c), 0) : 0),
+      kids: data.children?.map((c) => c.id) || [],
     };
 
     // Recursive function to map Algolia children to HNComment structure
@@ -32,7 +50,7 @@ export async function getItemWithComments(id: number): Promise<{ story: HNItem; 
       text: c.text || "",
       time: c.created_at_i,
       kids: c.children?.map((child) => child.id),
-      children: c.children ? c.children.map(mapComment) : []
+      children: c.children ? c.children.map(mapComment) : [],
     });
 
     const comments = data.children ? data.children.map(mapComment) : [];
@@ -44,11 +62,11 @@ export async function getItemWithComments(id: number): Promise<{ story: HNItem; 
   }
 }
 
-// Algolia Search API এর মাধ্যমে ক্যাটাগরি অনুযায়ী স্টোরি ফেচ করা
+// Algolia Search API এর মাধ্যমে ক্যাটাগরি অনুযায়ী স্টোরি ফেচ করা
 export async function getStoriesByType(
   type: string,
   page: number = 0,
-  hitsPerPage: number = 12
+  hitsPerPage: number = 12,
 ): Promise<HNItem[]> {
   try {
     let tags = "story";
@@ -76,7 +94,7 @@ export async function getStoriesByType(
       endpoint = "search_by_date";
       tags = "job";
     }
-    
+
     let url = `${ALGOLIA_BASE}/${endpoint}?tags=${tags}&page=${page}&hitsPerPage=${hitsPerPage}`;
     if (numericFilters) {
       url += `&numericFilters=${numericFilters}`;
@@ -84,10 +102,12 @@ export async function getStoriesByType(
 
     const res = await fetch(url);
     if (!res.ok) {
-      console.error(`Algolia API error: ${res.status} ${res.statusText} for URL: ${url}`);
+      console.error(
+        `Algolia API error: ${res.status} ${res.statusText} for URL: ${url}`,
+      );
       return [];
     }
-    
+
     const data: { hits: AlgoliaHit[] } = await res.json();
 
     return data.hits.map((hit) => ({
@@ -113,8 +133,15 @@ export async function getStoriesByType(
   }
 }
 
-// Algolia HN API এর মাধ্যমে একবারে সব কমেন্ট ফেচ করা
-// এটি Firebase API এর তুলনায় ১০-২০ গুণ বেশি ফাস্ট
+// ═══════════════════════════════════════════════════════════
+// Comment Prioritization System
+// ═══════════════════════════════════════════════════════════
+// Algolia API তে individual comment points নেই,
+// তাই reply count, text quality, এবং thread engagement দিয়ে
+// smart scoring করে best comments আগে AI-কে দেওয়া হয় (Moved to @/utils/hn)
+
+// Algolia HN API — Smart Comment Prioritization
+// Best comments আগে: reply count, text quality, engagement ভিত্তিতে sort
 export async function fetchCommentsForAI(storyId: number): Promise<string> {
   try {
     const response = await fetch(`${ALGOLIA_BASE}/items/${storyId}`);
@@ -125,42 +152,43 @@ export async function fetchCommentsForAI(storyId: number): Promise<string> {
 
     const MAX_COMMENTS = 200;
     const MAX_CHARS = 25000;
-    const flatComments: string[] = [];
-    let count = 0;
+
+    // Step 1: Collect and score ALL comments
+    const allComments = collectAndScoreComments(data.children);
+
+    // Step 2: Sort by score (highest first)
+    allComments.sort((a, b) => b.score - a.score);
+
+    // Step 3: Pick top comments within budget
+    const selectedLines: string[] = [];
     let totalChars = 0;
+    let count = 0;
 
-    function flatten(items: AlgoliaComment[], depth: number = 0) {
-      if (!items || depth > 3 || count >= MAX_COMMENTS || totalChars >= MAX_CHARS) return;
+    for (const comment of allComments) {
+      if (count >= MAX_COMMENTS || totalChars >= MAX_CHARS) break;
 
-      for (const item of items) {
-        if (count >= MAX_COMMENTS || totalChars >= MAX_CHARS) break;
-        if (!item.text || item.text === "" || item.author === null) continue;
+      const prefix =
+        comment.depth === 0
+          ? `[★${comment.replyCount > 0 ? ` ${comment.replyCount} replies` : ""}] User`
+          : `${"  ".repeat(comment.depth)}Reply`;
 
-        const cleanText = cleanHtml(item.text);
-        if (cleanText) {
-          const prefix = depth === 0 ? "User" : `${"  ".repeat(depth)}Reply`;
-          const line = `${prefix} (${item.author}): ${cleanText}`;
-          flatComments.push(line);
-          totalChars += line.length;
-          count++;
-        }
+      const line = `${prefix} (${comment.author}): ${comment.text}`;
 
-        if (item.children && item.children.length > 0) {
-          flatten(item.children, depth + 1);
-        }
-      }
+      if (totalChars + line.length > MAX_CHARS) break;
+
+      selectedLines.push(line);
+      totalChars += line.length;
+      count++;
     }
 
-    flatten(data.children);
-
-    let result = flatComments.join("\n---\n");
-    if (result.length > MAX_CHARS) {
-      result = result.substring(0, MAX_CHARS) + "\n\n[... truncated for brevity]";
+    let result = selectedLines.join("\n---\n");
+    if (allComments.length > count) {
+      result += `\n\n[${allComments.length - count} lower-priority comments omitted]`;
     }
 
     return result;
   } catch (error) {
     console.error("Error in fetchCommentsForAI (Algolia):", error);
-    return ""; // Fallback or handle error
+    return "";
   }
 }
