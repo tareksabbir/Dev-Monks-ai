@@ -1,10 +1,10 @@
 export function Footer() {
   const BANDS = [
-    "bg-[#ffeaa2]", // Light yellow
-    "bg-[#ffcd55]", // Darker yellow/orange
-    "bg-[#ffa000]", // Orange
-    "bg-[#ff5500]", // Dark orange/red
-    "bg-[#cc2200]", // Deep red
+    "bg-sunset-1", // Light yellow
+    "bg-sunset-2", // Darker yellow/orange
+    "bg-sunset-3", // Orange
+    "bg-sunset-4", // Dark orange/red
+    "bg-sunset-5", // Deep red
   ];
 
   return (

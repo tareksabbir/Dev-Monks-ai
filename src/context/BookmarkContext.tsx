@@ -6,7 +6,7 @@ import {
   getBookmarkIds,
   toggleBookmark as toggleAction,
 } from "@/app/actions/bookmarks";
-import { HNItem } from "@/lib/hn-api";
+import { HNItem } from "@/types";
 
 interface BookmarkContextType {
   bookmarkIds: Set<number>;

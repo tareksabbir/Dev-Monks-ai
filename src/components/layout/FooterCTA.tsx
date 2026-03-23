@@ -11,24 +11,24 @@ export function PixelCat() {
       <path
         d="M20 20 H25 V15 H30 V20 H45 V15 H50 V20 H55 V25 H60 V35 H20 V25 Z"
         fill="transparent"
-        stroke="#1a1a1a"
+        stroke="var(--foreground)"
         strokeWidth="2"
         strokeLinejoin="miter"
       />
-      <rect x="25" y="22" width="2" height="2" fill="#1a1a1a" />
-      <rect x="45" y="22" width="2" height="2" fill="#1a1a1a" />
-      <rect x="34" y="25" width="4" height="2" fill="#1a1a1a" />
+      <rect x="25" y="22" width="2" height="2" fill="var(--foreground)" />
+      <rect x="45" y="22" width="2" height="2" fill="var(--foreground)" />
+      <rect x="34" y="25" width="4" height="2" fill="var(--foreground)" />
       <path
         d="M10 25 H20 V35 H15 V30 H10 V25 Z"
         fill="transparent"
-        stroke="#1a1a1a"
+        stroke="var(--foreground)"
         strokeWidth="2"
         strokeLinejoin="miter"
       />
       <path
         d="M60 25 H70 V35 H65 V30 H60 V25 Z"
         fill="transparent"
-        stroke="#1a1a1a"
+        stroke="var(--foreground)"
         strokeWidth="2"
         strokeLinejoin="miter"
       />
@@ -54,17 +54,17 @@ export function FooterCTA() {
   const links = ["Try le Chat", "Build on AI Studio", "Talk to an expert"];
   return (
     <section className="bg-transparent py-20 text-center flex flex-col items-center">
-      <h2 className="text-4xl font-normal text-[#1a1a1a] tracking-tight mb-8">
+      <h2 className="text-4xl font-normal text-foreground tracking-tight mb-8">
         The next chapter of AI is yours.
       </h2>
       <div className="flex items-center justify-center gap-6 mb-16">
         {links.map((label) => (
           <button
             key={label}
-            className="group flex items-center text-sm font-medium text-[#1a1a1a] border-b border-[#1a1a1a] pb-0.5"
+            className="group flex items-center text-sm font-medium text-foreground border-b border-foreground pb-0.5"
           >
             {label}
-            <span className="ml-1 text-[#ff6b00] group-hover:translate-x-0.5 transition-transform">
+            <span className="ml-1 text-primary group-hover:translate-x-0.5 transition-transform">
               <ArrowRight size={14} color="currentColor" />
             </span>
           </button>

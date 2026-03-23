@@ -1,5 +1,6 @@
-import { getItem, fetchCommentTree } from "@/lib/hn-api";
-import CommentTree from "@/components/CommentTree";
+import { getItemWithComments } from "@/lib/hn-api";
+import { HNItem, HNComment } from "@/types";
+import CommentTree from "@/components/hn/CommentTree";
 import {
   ChevronLeft,
   MessageSquare,
@@ -9,6 +10,10 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import SummarizeButton from "@/components/hn/SummarizeButton";
+import { timeAgo } from "@/utils";
+import { notFound } from "next/navigation";
 
 export default async function StoryPage({
   params,
@@ -16,30 +21,13 @@ export default async function StoryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const story = await getItem(Number(id));
+  const result = await getItemWithComments(Number(id));
 
-  if (!story) {
-    return (
-      <div className="min-h-screen bg-[#fffdf4] flex items-center justify-center p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-            Story Not Found
-          </h1>
-          <p className="text-[#1a1a1a]/60 mb-6">
-            We couldn&#39;t retrieve the details for this story.
-          </p>
-          <Link
-            href="/"
-            className="px-6 py-3 bg-[#ff6b00] text-white font-bold uppercase tracking-widest text-xs transition-colors hover:bg-[#1a1a1a]"
-          >
-            Back to Feed
-          </Link>
-        </div>
-      </div>
-    );
+  if (!result || !result.story) {
+    notFound();
   }
 
-  const comments = await fetchCommentTree(story.kids || []);
+  const { story, comments } = result;
   const formattedDate = new Date(story.time * 1000).toLocaleDateString(
     "en-US",
     {
@@ -49,15 +37,20 @@ export default async function StoryPage({
     },
   );
 
+  // AI Summary চেক করা
+  const existingSummary = await prisma.summary.findUnique({
+    where: { storyId: Number(id) },
+  });
+
   return (
     <>
       <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-12">
         {/* Back Button */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#1a1a1a]/60 hover:text-[#ff6b00] transition-colors mb-12 group"
+          className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-primary transition-colors mb-12 group"
         >
-          <div className="w-8 h-8 rounded-full border border-[#1a1a1a]/10 flex items-center justify-center group-hover:border-[#ff6b00]/30 group-hover:bg-[#ff6b00]/5 transition-all">
+          <div className="w-8 h-8 rounded-full border border-foreground/10 flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
             <ChevronLeft size={16} />
           </div>
           Back to Feed
@@ -66,10 +59,10 @@ export default async function StoryPage({
         {/* Story Header */}
         <article className="mb-16">
           <div className="flex flex-wrap items-center gap-3 mb-6">
-            <span className="text-[10px] tracking-widest font-bold px-3 py-1 border border-[#1a1a1a] rounded-full bg-transparent text-[#1a1a1a] uppercase">
+            <span className="text-[10px] tracking-widest font-bold px-3 py-1 border border-foreground rounded-full bg-transparent text-foreground uppercase">
               {story.type}
             </span>
-            <div className="flex items-center gap-4 text-xs font-medium text-[#1a1a1a]/40">
+            <div className="flex items-center gap-4 text-xs font-medium text-foreground/40">
               <span className="flex items-center gap-1.5">
                 <Calendar size={13} /> {formattedDate}
               </span>
@@ -79,7 +72,7 @@ export default async function StoryPage({
             </div>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-normal text-[#1a1a1a] leading-[1.15] mb-8 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-normal text-foreground leading-[1.15] mb-8 tracking-tight">
             {story.title}
           </h1>
 
@@ -89,19 +82,19 @@ export default async function StoryPage({
                 href={story.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1a1a] text-white text-sm font-bold uppercase tracking-widest hover:bg-[#ff6b00] transition-all duration-300 shadow-[4px_4px_0px_#ff6b00]/20"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-white text-sm font-bold uppercase tracking-widest hover:bg-primary transition-all duration-300 shadow-[4px_4px_0px_rgba(255,107,0,0.2)]"
               >
                 Read Original <ExternalLink size={14} />
               </a>
             )}
 
-            <div className="flex items-center gap-6 text-[#1a1a1a]/60 py-2">
+            <div className="flex items-center gap-6 text-foreground/60 py-2">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-full bg-[#f9f3dd] border border-[#d8c8a8] flex items-center justify-center text-[#1a1a1a]">
+                <div className="w-9 h-9 rounded-full bg-secondary border border-card-border flex items-center justify-center text-foreground">
                   <ThumbsUp size={16} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-lg font-bold text-[#1a1a1a] leading-none">
+                  <span className="text-lg font-bold text-foreground leading-none">
                     {story.score || 0}
                   </span>
                   <span className="text-[10px] uppercase tracking-wider font-medium opacity-60">
@@ -111,11 +104,11 @@ export default async function StoryPage({
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-full bg-[#f9f3dd] border border-[#d8c8a8] flex items-center justify-center text-[#1a1a1a]">
+                <div className="w-9 h-9 rounded-full bg-secondary border border-card-border flex items-center justify-center text-foreground">
                   <MessageSquare size={16} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-lg font-bold text-[#1a1a1a] leading-none">
+                  <span className="text-lg font-bold text-foreground leading-none">
                     {story.descendants || 0}
                   </span>
                   <span className="text-[10px] uppercase tracking-wider font-medium opacity-60">
@@ -127,11 +120,25 @@ export default async function StoryPage({
           </div>
         </article>
 
+        {/* AI Summary Section */}
+        {story.descendants && story.descendants > 0 ? (
+          <div className="mb-16">
+            <SummarizeButton 
+              storyId={Number(id)} 
+              initialSummary={existingSummary ? {
+                summary: existingSummary.summary,
+                keyPoints: JSON.parse(existingSummary.keyPoints),
+                sentiment: existingSummary.sentiment
+              } : null}
+            />
+          </div>
+        ) : null}
+
         {/* Comments Section */}
-        <section className="border-t border-[#d8c8a8] pt-12 mt-12">
-          <h2 className="text-2xl font-normal text-[#1a1a1a] mb-10 tracking-tight flex items-center gap-3">
+        <section className="border-t border-card-border pt-12 mt-12">
+          <h2 className="text-2xl font-normal text-foreground mb-10 tracking-tight flex items-center gap-3">
             Discussion
-            <span className="text-sm font-medium text-[#1a1a1a]/30">
+            <span className="text-sm font-medium text-foreground/30">
               ({story.descendants || 0})
             </span>
           </h2>

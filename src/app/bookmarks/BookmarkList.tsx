@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { HNItem } from "@/lib/hn-api";
-import { PostCard } from "@/components/PostCard";
+import React, { useState, useMemo } from "react";
+import { HNItem } from "@/types";
+import { PostCard } from "@/components/hn/PostCard";
 import { Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -54,9 +54,9 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
   return (
     <div className="space-y-12">
       {/* Search and Filter Section - Styled like FilterBar */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-8 border-b border-[#d8c8a8]">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-8 border-b border-card-border">
         <div className="flex flex-col gap-4">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-[#1a1a1a]/40 font-bold">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted font-bold">
             Filter by type
           </span>
           <div className="flex flex-wrap gap-2">
@@ -70,8 +70,8 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
                 }}
                 className={`px-5 py-2 text-[13px] font-medium border transition-all duration-300 capitalize ${
                   activeFilter === cat
-                    ? "bg-[#1a1a1a] text-white border-[#1a1a1a] shadow-[4px_4px_0px_#ff6b00]"
-                    : "bg-transparent text-[#1a1a1a] border-[#d8c8a8] hover:border-[#1a1a1a] hover:bg-black/5"
+                    ? "bg-foreground text-white border-foreground shadow-[4px_4px_0px_var(--primary)]"
+                    : "bg-transparent text-foreground border-card-border hover:border-foreground hover:bg-black/5"
                 }`}
               >
                 {cat === "all" ? "All Items" : cat}
@@ -81,12 +81,12 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
         </div>
 
         <div className="flex flex-col gap-4 w-full md:w-auto">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-[#1a1a1a]/40 font-bold">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted font-bold">
             Search saved items
           </span>
           <div className="relative group w-full md:w-80">
             <svg
-              className="absolute left-0 top-1/2 -translate-y-1/2 text-[#1a1a1a]/60 group-focus-within:text-[#ff6b00] transition-colors"
+              className="absolute left-0 top-1/2 -translate-y-1/2 text-foreground/60 group-focus-within:text-primary transition-colors"
               width="16"
               height="16"
               viewBox="0 0 14 14"
@@ -114,7 +114,7 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
                 setSearchQuery(e.target.value);
                 setVisibleCount(12); // Reset pagination on search
               }}
-              className="pl-7 pr-8 py-2 text-sm bg-transparent border-b border-[#d8c8a8] focus:border-[#ff6b00] text-[#1a1a1a] placeholder:text-[#1a1a1a]/30 focus:outline-none w-full transition-all"
+              className="pl-7 pr-8 py-2 text-sm bg-transparent border-b border-card-border focus:border-primary text-foreground placeholder:text-foreground/30 focus:outline-none w-full transition-all"
             />
             {searchQuery && (
               <button
@@ -122,7 +122,7 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
                   setSearchQuery("");
                   setVisibleCount(12);
                 }}
-                className="absolute right-0 top-1/2 -translate-y-1/2 text-[#1a1a1a]/40 hover:text-[#ff6b00] transition-colors"
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-primary transition-colors"
               >
                 <X size={14} />
               </button>
@@ -136,17 +136,17 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="py-24 text-center bg-[#f9f3dd]/20 border border-dashed border-[#d8c8a8] rounded-xl"
+          className="py-24 text-center bg-secondary/20 border border-dashed border-card-border rounded-xl"
         >
-          <div className="mx-auto w-16 h-16 bg-[#d8c8a8]/20 flex items-center justify-center rounded-full mb-6">
-            <Search className="text-[#1a1a1a]/20" size={32} />
+          <div className="mx-auto w-16 h-16 bg-card-border/20 flex items-center justify-center rounded-full mb-6">
+            <Search className="text-foreground/20" size={32} />
           </div>
-          <h2 className="text-2xl font-normal text-[#1a1a1a] mb-2 font-serif">
+          <h2 className="text-2xl font-normal text-foreground mb-2 font-serif">
             {searchQuery
               ? `No bookmarks found for "${searchQuery}"`
               : `No ${activeFilter === "all" ? "items" : activeFilter} found`}
           </h2>
-          <p className="text-[#1a1a1a]/50 max-w-sm mx-auto text-sm leading-relaxed">
+          <p className="text-foreground/50 max-w-sm mx-auto text-sm leading-relaxed">
             {activeFilter !== "all"
               ? `You haven't bookmarked any items in the ${activeFilter} category yet.`
               : "Try searching for something else or browse the main feed to save more stories."}
@@ -158,7 +158,7 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
                 setActiveFilter("all");
                 setVisibleCount(12);
               }}
-              className="mt-8 text-[11px] font-bold uppercase tracking-widest text-[#ff6b00] hover:underline"
+              className="mt-8 text-[11px] font-bold uppercase tracking-widest text-primary hover:underline"
             >
               Reset all filters
             </button>
@@ -181,11 +181,11 @@ export function BookmarkList({ initialPosts }: BookmarkListProps) {
             <div className="flex justify-center mt-12 pb-8">
               <button
                 onClick={loadMore}
-                className="group relative px-10 py-4 bg-[#1a1a1a] text-[#fffdf4] font-bold text-sm uppercase tracking-widest hover:bg-[#ff6b00] transition-all duration-300 overflow-hidden"
+                className="group relative px-10 py-4 bg-foreground text-background font-bold text-sm uppercase tracking-widest hover:bg-primary transition-all duration-300 overflow-hidden"
               >
                 <span className="relative z-10">Load More Bookmarks</span>
-                <div className="absolute inset-0 bg-[#ff6b00] translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <div className="absolute -bottom-1 -right-1 w-full h-full border-r-2 border-b-2 border-[#1a1a1a] group-hover:border-[#ff6b00]" />
+                <div className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                <div className="absolute -bottom-1 -right-1 w-full h-full border-r-2 border-b-2 border-foreground group-hover:border-primary" />
               </button>
             </div>
           )}

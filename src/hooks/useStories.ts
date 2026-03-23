@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { HNItem } from "@/types";
 
 export function useStories(
   type: "top" | "new" | "best" | "ask" | "show" | "job" | "all",
@@ -12,10 +12,10 @@ export function useStories(
       const res = await fetch(
         `/api/stories?type=${type}&page=${pageParam}&query=${encodeURIComponent(query)}`,
       );
-      return res.json();
+      return res.json() as Promise<HNItem[]>;
     },
     initialPageParam: 0,
-    getNextPageParam: (lastPage: any[], allPages: any[]) => {
+    getNextPageParam: (lastPage: HNItem[], allPages: HNItem[][]) => {
       // If the last page has fewer than 12 items, we've reached the end
       if (!lastPage || lastPage.length < 12) return undefined;
       return allPages.length;

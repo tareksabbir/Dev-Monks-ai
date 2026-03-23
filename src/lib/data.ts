@@ -19,9 +19,9 @@ export const CATEGORIES = [
 ];
 
 export const TAG_COLORS: Record<string, string> = {
-  Research: "bg-[#fdfaf5] text-[#1a1a1a] border-[#1a1a1a]",
-  Company: "bg-[#fdfaf5] text-[#1a1a1a] border-[#1a1a1a]",
-  Product: "bg-[#fdfaf5] text-[#1a1a1a] border-[#1a1a1a]",
-  Engineering: "bg-[#fdfaf5] text-[#1a1a1a] border-[#1a1a1a]",
-  Solutions: "bg-[#fdfaf5] text-[#1a1a1a] border-[#1a1a1a]",
+  Research: "bg-tag-bg text-foreground border-foreground",
+  Company: "bg-tag-bg text-foreground border-foreground",
+  Product: "bg-tag-bg text-foreground border-foreground",
+  Engineering: "bg-tag-bg text-foreground border-foreground",
+  Solutions: "bg-tag-bg text-foreground border-foreground",
 };

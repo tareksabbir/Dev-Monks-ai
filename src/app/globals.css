@@ -3,11 +3,53 @@
 :root {
   --background: #fffdf4;
   --foreground: #1a1a1a;
+  --primary: #ff6b00;
+  --primary-foreground: #ffffff;
+  --muted: rgba(26, 26, 26, 0.6);
+  --card: #fef9e8;
+  --card-foreground: #1a1a1a;
+  --card-border: #d8c8a8;
+  --card-shadow: #ebd9b4;
+  --secondary: #f9f3dd;
+  --border: #e8e0d0;
+  --hero-border: #faf0de;
+  --grid: rgba(180, 160, 120, 0.35);
+  --tag-bg: #fdfaf5;
+  --sunset-1: #ffeaa2;
+  --sunset-2: #ffcd55;
+  --sunset-3: #ffa000;
+  --sunset-4: #ff5500;
+  --sunset-5: #cc2200;
+  --sentiment-positive: #22c55e;
+  --sentiment-negative: #ef4444;
+  --sentiment-mixed: #3b82f6;
+  --sentiment-neutral: #6b7280;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-border: var(--card-border);
+  --color-card-shadow: var(--card-shadow);
+  --color-secondary: var(--secondary);
+  --color-border: var(--border);
+  --color-hero-border: var(--hero-border);
+  --color-grid: var(--grid);
+  --color-tag-bg: var(--tag-bg);
+  --color-sunset-1: var(--sunset-1);
+  --color-sunset-2: var(--sunset-2);
+  --color-sunset-3: var(--sunset-3);
+  --color-sunset-4: var(--sunset-4);
+  --color-sunset-5: var(--sunset-5);
+  --color-sentiment-positive: var(--sentiment-positive);
+  --color-sentiment-negative: var(--sentiment-negative);
+  --color-sentiment-mixed: var(--sentiment-mixed);
+  --color-sentiment-neutral: var(--sentiment-neutral);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -15,4 +57,13 @@
 body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
 }

@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { HNItem } from "@/lib/hn-api";
+import { HNItem } from "@/types";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { ensureUserId, USER_ID_COOKIE } from "@/cookies/auth-utils";
@@ -73,7 +72,7 @@ export async function getBookmarks() {
   });
 }
 
-export async function getBookmarkIds() {
+export async function getBookmarkIds(): Promise<number[]> {
   const cookieStore = await cookies();
   const userId = cookieStore.get(USER_ID_COOKIE)?.value;
   if (!userId) return [];
@@ -83,5 +82,5 @@ export async function getBookmarkIds() {
     select: { storyId: true },
   });
 
-  return bookmarks.map((b: any) => b.storyId);
+  return bookmarks.map((b) => b.storyId);
 }
