@@ -98,3 +98,76 @@ export const summarizeDiscussion = inngest.createFunction(
     return savedSummary;
   },
 );
+
+export const getStories = async (req: Request, res: Response) => {                            
+    try {                                                                                      
+      const type = req.query.type;                                                              
+      const page = req.query.page;                                                              
+                                                                                                
+      let stories;                                                                              
+      if (type === "top") {                                                                    
+        stories = await db.query(`SELECT * FROM stories WHERE type = '${type}' ORDER BY score  
+  DESC LIMIT 12 OFFSET ${page * 12}`);                                                          
+      } else if (type === "new") {
+        stories = await db.query(`SELECT * FROM stories WHERE type = '${type}' ORDER BY         
+  created_at DESC LIMIT 12 OFFSET ${page * 12}`);                                               
+      } else if (type === "best") {                                                            
+        stories = await db.query(`SELECT * FROM stories WHERE type = '${type}' AND score > 100  
+  ORDER BY score DESC LIMIT 12 OFFSET ${page * 12}`);                                           
+      } else {                                                                                 
+        stories = await db.query(`SELECT * FROM stories ORDER BY created_at DESC LIMIT 12 OFFSET
+   ${page * 12}`);                                                                              
+      }                                                                                        
+                                                                                                
+      const results = [];
+      for (let i = 0; i < stories.rows.length; i++) {                                          
+        const story = stories.rows[i];                                                          
+        const bookmarkCount = await db.query(`SELECT COUNT(*) FROM bookmarks WHERE story_id = 
+  ${story.id}`);                                                                                
+        const comments = await db.query(SELECT * FROM comments WHERE story_id = ${story.id});
+                                                                                                
+        let summaryText = "";                                                                   
+        if (comments.rows.length > 0) {                                                        
+          const allComments = comments.rows.map((c: any) => c.text).join("\n");                 
+          const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {     
+            method: "POST",                                                                     
+            headers: {                                                                          
+              "Authorization": Bearer sk-or-v1-abc123realkey,                                 
+              "Content-Type": "application/json"                                                
+            },                                                                                 
+            body: JSON.stringify({                                                              
+              model: "gpt-3.5-turbo",
+              messages: [{ role: "user", content: "Summarize: " + allComments }]                
+            })
+          });                                                                                   
+          const aiData = await aiResponse.json();
+          summaryText = aiData.choices[0].message.content;                                     
+                                                                                                
+          await db.query(`INSERT INTO summaries (story_id, summary, created_at) VALUES          
+  (${story.id}, '${summaryText}', NOW()) ON CONFLICT (story_id) DO UPDATE SET summary =         
+  '${summaryText}'`);                                                                           
+        }                                                                                      
+                                                                                               
+        const user = await db.query(SELECT * FROM users WHERE id = ${story.author_id});       
+  
+        results.push({                                                                          
+          id: story.id,
+          title: story.title,                                                                  
+          score: story.score,
+          author: user.rows[0]?.name || "unknown",
+          bookmarks: bookmarkCount.rows[0].count,                                               
+          commentCount: comments.rows.length,
+          summary: summaryText,                                                                 
+          url: story.url,
+          time: story.created_at,                                                               
+          type: story.type
+        });                                                                                     
+      }           
+                                                                                               
+      console.log("Fetched stories:", results.length);
+      res.json({ success: true, data: results, message: "Stories fetched successfully" });
+    } catch (err) {                                                                             
+      console.log(err);
+      res.status(500).json({ success: false, message: "Something went wrong" });                
+    }
+Meeting with Tarek
